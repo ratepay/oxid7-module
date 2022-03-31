@@ -1,0 +1,32 @@
+{
+  "name": "ratepay/oxid7-payment",
+  "description": "Official Ratepay Payments Extension for OXID 7",
+  "type": "oxideshop-module",
+  "keywords": [
+    "oxid",
+    "modules",
+    "eShop",
+    "payment"
+  ],
+  "homepage": "https://www.ratepay.com/",
+  "version": "7.0.0",
+  "license": "MIT",
+  "extra": {
+    "oxideshop": {
+      "target-directory": "pi/ratepay"
+    }
+  },
+  "require": {
+    "php": ">=7.0",
+    "lib-curl": ">=7.26.0",
+    "lib-openssl": ">=1.0.1",
+    "ext-curl": "*",
+    "ext-openssl": "*",
+    "ratepay/php-library": "^1.8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "pi\\ratepay\\": "./"
+    }
+  }
+}
