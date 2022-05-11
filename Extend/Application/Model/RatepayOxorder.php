@@ -2,8 +2,6 @@
 
 namespace pi\ratepay\Extend\Application\Model;
 
-use OxidEsales\Eshop\Application\Model\Basket;
-use OxidEsales\Eshop\Application\Model\UserPayment;
 use OxidEsales\Eshop\Core\Counter;
 
 class RatepayOxorder extends RatepayOxorder_parent
@@ -11,12 +9,12 @@ class RatepayOxorder extends RatepayOxorder_parent
     /**
      * OX-19: Fix empty ordernr during Ratepay payment
      *
-     * @param Basket $oBasket   basket object
-     * @param UserPayment $oUserpayment   user payment object
+     * @param \OxidEsales\Eshop\Application\Model\Basket $oBasket      basket object
+     * @param object                                     $oUserpayment user payment object
      *
      * @return  integer 2 or an error code
      */
-    protected function _executePayment(Basket $oBasket, $oUserpayment)
+    protected function executePayment(\OxidEsales\Eshop\Application\Model\Basket $oBasket, $oUserpayment)
     {
         if ($oUserpayment->oxuserpayments__oxpaymentsid->value  == "pi_ratepay_rate"
             || $oUserpayment->oxuserpayments__oxpaymentsid->value  == "pi_ratepay_rate0"
@@ -24,12 +22,12 @@ class RatepayOxorder extends RatepayOxorder_parent
             || $oUserpayment->oxuserpayments__oxpaymentsid->value == "pi_ratepay_elv"
         ) {
             if (!$this->oxorder__oxordernr->value) {
-                $this->_setNumber();
+                $this->setNumber();
             } else {
                 oxNew(Counter::class)->update($this->_getCounterIdent(), $this->oxorder__oxordernr->value);
             }
         }
 
-        return parent::_executePayment($oBasket, $oUserpayment);
+        return parent::executePayment($oBasket, $oUserpayment);
     }
 }

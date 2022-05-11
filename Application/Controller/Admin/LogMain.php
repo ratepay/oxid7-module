@@ -18,10 +18,10 @@ use pi\ratepay\Application\Model\Logs;
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * @category  PayIntelligent
- * @package   PayIntelligent_RatePAY
+ * @category      PayIntelligent
+ * @package       PayIntelligent_RatePAY
  * @copyright (C) 2011 PayIntelligent GmbH  <http://www.payintelligent.de/>
- * @license	http://www.gnu.org/licenses/  GNU General Public License 3
+ * @license       http://www.gnu.org/licenses/  GNU General Public License 3
  */
 
 /**
@@ -39,18 +39,21 @@ class LogMain extends AdminViewBase
 {
     /**
      * Current class template name.
+     *
      * @var string
      */
     protected $_sThisTemplate = 'pi_ratepay_log_main.tpl';
 
     /**
      * Name of chosen object class (default null).
+     *
      * @var string
      */
     protected $_sModelClass = Logs::class;
 
     /**
      * DB Table
+     *
      * @var string
      */
     protected $_sTable = 'pi_ratepay_logs';
@@ -61,9 +64,10 @@ class LogMain extends AdminViewBase
      * @param void
      * @return string
      */
-    public function render() {
+    public function render()
+    {
         parent::render();
-        $sSavedID  = $this->_piGetSavedId();
+        $sSavedID = $this->_piGetSavedId();
         $sOxid = $this->_piGetOxid();
 
         $blNotLoaded = (
@@ -80,9 +84,9 @@ class LogMain extends AdminViewBase
 
         if ($blNotLoaded) {
             $sOxid = $sSavedID;
-            $this->_aViewData["oxid"] =  $sOxid;
+            $this->_aViewData["oxid"] = $sOxid;
             // for reloading upper frame
-            $this->_aViewData["updatelist"] =  "1";
+            $this->_aViewData["updatelist"] = "1";
         }
 
         if ($blLoaded) {
@@ -98,7 +102,7 @@ class LogMain extends AdminViewBase
             );
             $oRatePayLogs->load($sOxid);
 
-            $this->_aViewData["edit"] =  $oRatePayLogs;
+            $this->_aViewData["edit"] = $oRatePayLogs;
         }
 
         return $this->_sThisTemplate;
@@ -114,12 +118,12 @@ class LogMain extends AdminViewBase
     {
         $oDb = DatabaseProvider::getDb();
         $sLogDays = Registry::getRequest()->getRequestEscapedParameter('logdays');
-        $iLogDays = (int) $sLogDays;
+        $iLogDays = (int)$sLogDays;
 
-        $sQuery = "DELETE FROM ".$this->_sTable;
+        $sQuery = "DELETE FROM " . $this->_sTable;
 
         if ($iLogDays > 0) {
-            $sQuery .= " WHERE TO_DAYS(now()) - TO_DAYS(date) > ".$iLogDays;
+            $sQuery .= " WHERE TO_DAYS(now()) - TO_DAYS(date) > " . $iLogDays;
         }
 
         $oDb->execute($sQuery);
