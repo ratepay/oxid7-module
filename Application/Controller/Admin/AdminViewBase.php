@@ -6,20 +6,11 @@ use OxidEsales\Eshop\Application\Controller\Admin\AdminController;
 use OxidEsales\Eshop\Core\Registry;
 
 /**
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (c) Ratepay GmbH
  *
- * @category  PayIntelligent
- * @package   PayIntelligent_RatePAY
- * @copyright (C) 2011 PayIntelligent GmbH  <http://www.payintelligent.de/>
- * @license	http://www.gnu.org/licenses/  GNU General Public License 3
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 abstract class AdminViewBase extends AdminController
 {
@@ -29,9 +20,9 @@ abstract class AdminViewBase extends AdminController
      * @param void
      * @return string
      */
-    protected function _piGetOxid() {
+    protected function piGetOxid()
+    {
         $sOxid = Registry::getRequest()->getRequestEscapedParameter("oxid");
-
         return $sOxid;
     }
 
@@ -41,7 +32,7 @@ abstract class AdminViewBase extends AdminController
      * @param void
      * @return string
      */
-    protected function _piGetSavedId()
+    protected function piGetSavedId()
     {
         $sSavedID = Registry::getRequest()->getRequestEscapedParameter("saved_oxid");
 
@@ -54,7 +45,7 @@ abstract class AdminViewBase extends AdminController
      * @param void
      * @return void
      */
-    protected function _piDeleteSavedId()
+    protected function piDeleteSavedId()
     {
         $oSession = Registry::getSession();
         $oSession->deleteVariable("saved_oxid");
@@ -66,7 +57,7 @@ abstract class AdminViewBase extends AdminController
      * @param string $parameter
      * @return int 0 for false and 1 for true
      */
-    protected function _isParameterCheckedOn($parameter)
+    protected function isParameterCheckedOn($parameter)
     {
         $checked = 0;
 
@@ -83,7 +74,7 @@ abstract class AdminViewBase extends AdminController
      * @param string $parameter
      * @return int 0 for false and 1 for true
      */
-    protected function _isParameterCheckedYes($parameter)
+    protected function isParameterCheckedYes($parameter)
     {
         $checked = 0;
         if ($parameter != null && $parameter == 'yes') {

@@ -1,20 +1,11 @@
 <?php
 
 /**
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (c) Ratepay GmbH
  *
- * @category  PayIntelligent
- * @package   PayIntelligent_RatePAY_Rechnung
- * @copyright (C) 2011 PayIntelligent GmbH  <http://www.payintelligent.de/>
- * @license	http://www.gnu.org/licenses/  GNU General Public License 3
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 // -------------------------------
 // RESOURCE IDENTITFIER = STRING
@@ -27,7 +18,7 @@ $piErrorPhone = 'Um eine Zahlung per Ratepay Rechnung durchzuf&uuml;hren, geben 
 $piErrorCompany = 'Geben Sie bitte Ihren Firmennamen und Ihre Umsatzsteuer-ID ein.';
 $piErrorBirthdayDigits = 'Geben Sie bitte Ihr Geburtsjahr vierstellig ein. (z.B. 1982)';
 
-$aLang = array(
+$aLang = [
     'charset'                                            => 'UTF-8',
     'PI_RATEPAY_RECHNUNG_VIEW_SANDBOX_NOTIFICATION'      => 'Testmodus aktiviert, bitte nutzen Sie diese Zahlart NICHT f&uuml;r die Bestellung und informieren den H&auml;ndler &uuml;ber diese Nachricht.',
     'PI_RATEPAY_RECHNUNG_VIEW_POLICY_TEXT_1'             => 'Ich habe die ',
@@ -57,4 +48,4 @@ $aLang = array(
     'PI_RATEPAY_RECHNUNG_VIEW_PAYMENT_UST'               => 'USt-IdNr.',
     'PI_RATEPAY_ERROR_BIRTHDAY_YEAR_DIGITS'              => $piErrorBirthdayDigits,
     'PI_RATEPAY_ERROR_COMPANY'                           => $piErrorCompany
-);
+];

@@ -1,0 +1,20 @@
+{#
+/**
+ *
+ * Copyright (c) Ratepay GmbH
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+#}
+{% include "headitem.html.twig" with {title: "GENERAL_ADMIN_TITLE"|translate} %}
+
+{{ translate({ ident: "PI_RATEPAY_NODETAILS" }) }}
+
+<form name="transfer" id="transfer" action="{{  oViewConf.getSelfLink()|raw  }}" method="post">
+    {{  oViewConf.getHiddenSid()|raw  }}
+    <input type="hidden" name="oxid" value="{{  oxid  }}">
+    <input type="hidden" name="cl" value="RatepayDetails">
+</form>
+
+{% include "bottomitem.html.twig" %}

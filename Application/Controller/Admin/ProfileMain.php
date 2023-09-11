@@ -6,20 +6,11 @@ use OxidEsales\Eshop\Core\TableViewNameGenerator;
 use pi\ratepay\Application\Model\Settings;
 
 /**
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (c) Ratepay GmbH
  *
- * @category  PayIntelligent
- * @package   PayIntelligent_RatePAY
- * @copyright (C) 2011 PayIntelligent GmbH  <http://www.payintelligent.de/>
- * @license	http://www.gnu.org/licenses/  GNU General Public License 3
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 class ProfileMain extends AdminViewBase
 {
@@ -27,7 +18,7 @@ class ProfileMain extends AdminViewBase
      * Current class template name.
      * @var string
      */
-    protected $_sThisTemplate = 'pi_ratepay_profile_main.tpl';
+    protected $_sThisTemplate = '@ratepay/pi_ratepay_profile_main';
 
     /**
      * Name of chosen object class (default null).
@@ -50,8 +41,8 @@ class ProfileMain extends AdminViewBase
      */
     public function render() {
         parent::render();
-        $sSavedID  = $this->_piGetSavedId();
-        $sOxid = $this->_piGetOxid();
+        $sSavedID  = $this->piGetSavedId();
+        $sOxid = $this->piGetOxid();
 
         $blNotLoaded = (
             (
@@ -74,7 +65,7 @@ class ProfileMain extends AdminViewBase
 
         if ($blLoaded) {
             // load object
-            $this->_piDeleteSavedId();
+            $this->piDeleteSavedId();
 
             $tableViewNameGenerator = oxNew(TableViewNameGenerator::class);
             $sViewName = $tableViewNameGenerator->getViewName($this->_sModelClass);
@@ -83,6 +74,7 @@ class ProfileMain extends AdminViewBase
                 $this->_sModelClass,
                 $sViewName
             );
+            /** @var Settings $oProfile */
             $oProfile->load($sOxid);
 
             $this->_aViewData["edit"] =  $oProfile;

@@ -6,7 +6,16 @@ use OxidEsales\Eshop\Core\Registry;
 use pi\ratepay\Application\Model\Settings;
 use pi\ratepay\Core\ModelFactory;
 use pi\ratepay\Core\Utilities;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
 
+/**
+ *
+ * Copyright (c) Ratepay GmbH
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 class RatepayModuleConfig extends RatepayModuleConfig_parent
 {
 
@@ -84,7 +93,7 @@ class RatepayModuleConfig extends RatepayModuleConfig_parent
         $aConfig =
             $this->_aCountry2Payment2Configs[$sCountryCode][$sPaymentType];
 
-        $blConnected = (bool) $this->_piPerformProfileRequest($aConfig);
+        $blConnected = (bool) $this->piPerformProfileRequest($aConfig);
 
         return $blConnected;
     }
@@ -97,7 +106,7 @@ class RatepayModuleConfig extends RatepayModuleConfig_parent
         parent::saveConfVars();
         $blIsRatePay = $this->piIsRatepayModuleConfig();
         if ($blIsRatePay) {
-            $this->_piFetchAndSaveRatepayProfiles();
+            $this->piFetchAndSaveRatepayProfiles();
         }
     }
 
@@ -107,18 +116,19 @@ class RatepayModuleConfig extends RatepayModuleConfig_parent
      * @param void
      * @return void
      */
-    protected function _piFetchAndSaveRatepayProfiles()
+    protected function piFetchAndSaveRatepayProfiles()
     {
-        $oConfig = Registry::getConfig();
-
-        $aActiveCombinations = $this->_piGetActiveCombinations();
+        $moduleSettingService = ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(ModuleSettingServiceInterface::class);
+        $aActiveCombinations = $this->piGetActiveCombinations();
 
         foreach ($aActiveCombinations as $aActiveCombination) {
             $aConfigParams = $aActiveCombination['configparams'];
-            $aResult = $this->_piPerformProfileRequest($aConfigParams);
+            $aResult = $this->piPerformProfileRequest($aConfigParams);
 
             if (!$aResult) {
-                $blSandbox = $oConfig->getConfigParam($aConfigParams['sandbox']);
+                $blSandbox = $moduleSettingService->getBoolean($aConfigParams['sandbox'], 'ratepay');
                 $iEditLanguage = Registry::getRequest()->getRequestEscapedParameter("editlanguage");
                 $oUtilsView = Registry::get('oxUtilsView');
                 $oLang = Registry::get('oxLang');
@@ -143,21 +153,23 @@ class RatepayModuleConfig extends RatepayModuleConfig_parent
      * @param $aConfigParams
      * @return mixed
      */
-    protected function _piPerformProfileRequest($aConfigParams)
+    protected function piPerformProfileRequest($aConfigParams)
     {
-        $oConfig = Registry::getConfig();
+        $moduleSettingService = ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(ModuleSettingServiceInterface::class);
 
-        $sSecurityCode = $oConfig->getConfigParam($aConfigParams['secret']);
-        $sProfileId = $oConfig->getConfigParam($aConfigParams['profileid']);
-        $blSandbox = $oConfig->getConfigParam($aConfigParams['sandbox']);
-        $blActive = $oConfig->getConfigParam($aConfigParams['active']);
+        $sSecurityCode = $moduleSettingService->getString($aConfigParams['secret'], 'ratepay');
+        $sProfileId = $moduleSettingService->getString($aConfigParams['profileid'], 'ratepay');
+        $blSandbox = $moduleSettingService->getBoolean($aConfigParams['sandbox'], 'ratepay');
+        $blActive = $moduleSettingService->getBoolean($aConfigParams['active'], 'ratepay');
+
 
         $blValid = (
             $blActive &&
             !empty($sProfileId) &&
             !empty($sSecurityCode)
         );
-
         if (!$blValid) return false;
         $modelFactory = oxNew(ModelFactory::class);
         $modelFactory->setSecurityCode($sSecurityCode);
@@ -176,12 +188,14 @@ class RatepayModuleConfig extends RatepayModuleConfig_parent
      * @param void
      * @return array
      */
-    protected function _piGetActiveCombinations()
+    protected function piGetActiveCombinations()
     {
-        $oConfig = Registry::getConfig();
+        $moduleSettingService = ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(ModuleSettingServiceInterface::class);
         $aCountries = Utilities::$_RATEPAY_ALLOWED_COUNTRIES;
         $aMethods = Utilities::$_RATEPAY_PAYMENT_METHOD_NAMES;
-        $aActiveCombinations = array();
+        $aActiveCombinations = [];
 
         foreach ($aCountries as $sCountry) {
             foreach ($aMethods as $sRequestMethod => $sMethod) {
@@ -192,17 +206,16 @@ class RatepayModuleConfig extends RatepayModuleConfig_parent
                 $aConfig =
                     $this->_aCountry2Payment2Configs[$sCountry][$sMethod];
                 $sActiveConfigParam = $aConfig['active'];
-                $blIsActive =
-                    $oConfig->getConfigParam($sActiveConfigParam);
+                $blIsActive = $moduleSettingService->getBoolean($sActiveConfigParam, 'ratepay');
 
                 if (!$blIsActive) continue;
 
-                $aActiveCombinations[] = array(
+                $aActiveCombinations[] = [
                     'country'       => $sCountry,
-                    'method'          => $sMethod,
+                    'method'        => $sMethod,
                     'configparams'  => $aConfig,
                     'requestmethod' => $sRequestMethod,
-                );
+                ];
             }
         }
 

@@ -6,20 +6,11 @@ use OxidEsales\Eshop\Application\Controller\FrontendController;
 use OxidEsales\Eshop\Core\Registry;
 
 /**
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (c) Ratepay GmbH
  *
- * @category  PayIntelligent
- * @package   PayIntelligent_RatePAY
- * @copyright (C) 2011 PayIntelligent GmbH  <http://www.payintelligent.de/>
- * @license	http://www.gnu.org/licenses/  GNU General Public License 3
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 /**
@@ -34,22 +25,10 @@ class RateCalc extends FrontendController
     /**
      * {@inheritdoc}
      *
-     * @see FrontendController::init()
-     */
-    public function init()
-    {
-        parent::init();
-
-        $this->_sThisTemplate = 'pi_ratepay_rate_calc.tpl';
-    }
-
-    /**
-     * {@inheritdoc}
-     *
      * Also adds template variable 'piTotalAmount' (brutto price, rounded).
      *
-     * @see FrontendController::render()
      * @return string
+     * @see FrontendController::render()
      */
     public function render()
     {
@@ -80,7 +59,7 @@ class RateCalc extends FrontendController
 
         $oBasket = Registry::getSession()->getBasket();
         if ($myConfig->getConfigParam('blPsBasketReservationEnabled')
-            && (!$oBasket || ( $oBasket && !$oBasket->getProductsCount() ))
+            && (!$oBasket || ($oBasket && !$oBasket->getProductsCount()))
         ) {
             Registry::getUtils()->redirect(
                 $myConfig->getShopHomeURL() . 'cl=basket'
@@ -90,7 +69,7 @@ class RateCalc extends FrontendController
         $oUser = $this->getUser();
         if (!$oBasket
             || !$oUser
-            || ( $oBasket && !$oBasket->getProductsCount() )
+            || ($oBasket && !$oBasket->getProductsCount())
         ) {
             Registry::getUtils()->redirect(
                 $myConfig->getShopHomeURL() . 'cl=start'
@@ -107,7 +86,7 @@ class RateCalc extends FrontendController
         $checking = true;
 
         // test for these variables in session
-        $ratepaySessionVariables = array(
+        $ratepaySessionVariables = [
             'pi_ratepay_rate_total_amount',
             'pi_ratepay_rate_amount',
             'pi_ratepay_rate_interest_amount',
@@ -117,7 +96,7 @@ class RateCalc extends FrontendController
             'pi_ratepay_rate_number_of_rates',
             'pi_ratepay_rate_rate',
             'pi_ratepay_rate_last_rate'
-        );
+        ];
 
         foreach ($ratepaySessionVariables as $sessionVariable) {
             if (!Registry::getSession()->hasVariable($sessionVariable)

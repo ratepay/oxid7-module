@@ -1,0 +1,395 @@
+{#
+/**
+ *
+ * Copyright (c) Ratepay GmbH
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+#}
+{% include "headitem.html.twig" with {title: "GENERAL_ADMIN_TITLE"|translate} %}
+
+<script type="text/javascript">
+    function showWaitingWheel() {
+        document.getElementById("waitingWheel").style.visibility = 'visible';
+    }
+</script>
+<!--[if gte IE 6]>
+<style>
+    .waitIMG{
+        visibility:hidden;
+    }
+</style>
+<![endif]-->
+
+<form name="transfer" id="transfer" action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+    {{ oViewConf.getHiddenSid()|raw }}
+    <input type="hidden" name="oxid" value="{{ oxid }}">
+    <input type="hidden" name="cl" value="RatepayDetails">
+</form>
+
+{% if isset(pierror) %}
+    {% if pierror == "" %}
+        <div class="messagebox" style="color:red;"><b>{{ translate({ ident: "PI_RATEPAY_ERRORDELIVERY" }) }}</b></div>
+    {% endif %}
+    {% if pierror == "credit" %}
+        <div class="messagebox" style="color:red;"><b>{{ translate({ ident: "PI_RATEPAY_ERRORVOUCHER" }) }}</b></div>
+    {% endif %}
+    {% if pierror == "partial - return" %}
+        <div class="messagebox" style="color:red;"><b>{{ translate({ ident: "PI_RATEPAY_ERRORPARTIALRETURN" }) }}</b></div>
+    {% endif %}
+    {% if pierror == "full - return" %}
+        <div class="messagebox" style="color:red;"><b>{{ translate({ ident: "PI_RATEPAY_ERRORFULLRETURN" }) }}</b></div>
+    {% endif %}
+    {% if pierror == "partial - cancellation" %}
+        <div class="messagebox" style="color:red;"><b>{{ translate({ ident: "PI_RATEPAY_ERRORPARTIALCANCELLATION" }) }}</b></div>
+    {% endif %}
+    {% if pierror == "full - cancellation" %}
+        <div class="messagebox" style="color:red;"><b>{{ translate({ ident: "PI_RATEPAY_ERRORFULLCANCELLATION" }) }}</b></div>
+    {% endif %}
+{% endif %}
+{% if isset(pisuccess) %}
+    {% if pisuccess == "" %}
+        <div class="messagebox" style="color:green;"><b>{{ translate({ ident: "PI_RATEPAY_SUCCESSDELIVERY" }) }}</b></div>
+    {% endif %}
+    {% if pisuccess == "credit" %}
+        <div class="messagebox" style="color:green;"><b>{{ translate({ ident: "PI_RATEPAY_SUCCESSVOUCHER" }) }}</b></div>
+    {% endif %}
+    {% if pisuccess == "partial - return" %}
+        <div class="messagebox" style="color:green;"><b>{{ translate({ ident: "PI_RATEPAY_SUCCESSPARTIALRETURN" }) }}</b></div>
+    {% endif %}
+    {% if pisuccess == "full - return" %}
+        <div class="messagebox" style="color:green;"><b>{{ translate({ ident: "PI_RATEPAY_SUCCESSFULLRETURN" }) }}</b></div>
+    {% endif %}
+    {% if pisuccess == "partial - cancellation" %}
+        <div class="messagebox" style="color:green;"><b>{{ translate({ ident: "PI_RATEPAY_SUCCESSPARTIALCANCELLATION" }) }}</b></div>
+    {% endif %}
+    {% if pisuccess == "full - cancellation" %}
+        <div class="messagebox" style="color:green;"><b>{{ translate({ ident: "PI_RATEPAY_SUCCESSFULLCANCELLATION" }) }}</b></div>
+    {% endif %}
+{% endif %}
+<div id="message" class="messagebox" style="visibility:hidden;"></div>
+<fieldset style="padding-left: 5px; padding-right: 5px;">
+    <legend>Transaktionssdetails</legend><br/>
+    <table>
+        <tr>
+            <td>Transanction Id:</td>
+            <td>{{ pi_transaction_id }}</td>
+        </tr>
+        <tr>
+            <td>Verwendungszweck/<br/>Descriptor:</td>
+            <td>{{ pi_descriptor }}</td>
+        </tr>
+        {% if pi_ratepay_payment_type is same as("INSTALLMENT") %}
+            <tr>
+                <td colspan="2">
+                    <fieldset style="padding-left: 5px; padding-right: 5px;">
+                        <legend>Ratendetails</legend><br/>
+                        <table>
+                            <tr>
+                                <td>Gesamtbetrag:</td>
+                                <td>{{ pirptotalamountvalue }}</td>
+                            </tr>
+                            <tr>
+                                <td>Barzahlungspreis:</td>
+                                <td>{{ pirpamountvalue }}</td>
+                            </tr>
+                            <tr>
+                                <td>Zinsbetrag:</td>
+                                <td>{{ pirpinterestamountvalue }}</td>
+                            </tr>
+                            <tr>
+                                <td>Vertragsabschlussgebühr:</td>
+                                <td>{{ pirpservicechargevalue }}</td>
+                            </tr>
+                            <tr>
+                                <td>Effektiver Jahreszins:</td>
+                                <td>{{ pirpannualpercentageratevalue }}</td>
+                            </tr>
+                            <tr>
+                                <td>Sollzinssatz pro Monat:</td>
+                                <td>{{ pirpmonthlydebitinterestvalue }}</td>
+                            </tr>
+                            <tr>
+                                <td>Laufzeit:</td>
+                                <td>{{ pirpnumberofratesvalue }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ pirpnumberofratesvalue - 1 }}&nbsp;monatliche Raten à:</td>
+                                <td>{{ pirpratevalue }}</td>
+                            </tr>
+                            <tr>
+                                <td>zzgl. einer Abschlussrate à:</td>
+                                <td>{{ pirplastratevalue }}</td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                </td>
+            </tr>
+        {% endif %}
+    </table>
+</fieldset>
+
+<br/>
+{% set storniert_versendet = "0" %}
+{% for article in articleList %}
+    {% if article.amount > 0 %}
+        {% set storniert_versendet = "1" %}
+    {% endif %}
+{% endfor %}
+
+<fieldset title="{{ translate({ ident: "PI_RATEPAY_SHIPPING" }) }}/{{ translate({ ident: "PI_RATEPAY_CANCELLING" }) }}" style="padding-left: 5px; padding-right: 5px;">
+    <legend>{{ translate({ ident: "PI_RATEPAY_SHIPPING_TABLE_HEAD" }) }}</legend><br/>
+    <form action="{{ oViewConf.getSelfLink()|raw }}" method="post" id="articleList">
+        {{ oViewConf.getHiddenSid()|raw }}
+        <input type="hidden" name="cur" value="{{ oCurr.id }}">
+        <input type="hidden" name="oxid" value="{{ oxid }}">
+        <input type="hidden" name="cl" value="RatepayDetails">
+        <input type="hidden" name="fnc" value="">
+
+        {% set blWhite = "" %}
+
+        <table cellspacing="0" cellpadding="0" border="0" width="98%">
+            <tr>
+                <td class="listheader first">{{ translate({ ident: "PI_RATEPAY_QUANTITY" }) }}</td>
+                <td class="listheader">{{ translate({ ident: "PI_RATEPAY_ARTICLENR" }) }}</td>
+                <td class="listheader">{{ translate({ ident: "PI_RATEPAY_ARTICLENAME" }) }}</td>
+                <td class="listheader">{{ translate({ ident: "PI_RATEPAY_UNITPRICE" }) }}</td>
+                <td class="listheader">{{ translate({ ident: "PI_RATEPAY_TAX" }) }}</td>
+                <td class="listheader">{{ translate({ ident: "PI_RATEPAY_TOTALPRICE" }) }}</td>
+                <td class="listheader">{{ translate({ ident: "PI_RATEPAY_ORDERED" }) }}</td>
+                <td class="listheader">{{ translate({ ident: "PI_RATEPAY_SHIPPED" }) }}</td>
+                <td class="listheader">{{ translate({ ident: "PI_RATEPAY_CANCELLED" }) }}</td>
+                <td class="listheader">{{ translate({ ident: "PI_RATEPAY_RETURNED" }) }}</td>
+            </tr>
+            {% for article in articleList %}
+                {% set listclass = "listitem"~blWhite %}
+                <tr>
+                    {% if article.amount > 0 %}
+                        <td valign="top" class="{{ listclass }}"><input name="{{ article.arthash }}" type="text" maxlength="4" style="width: 40px;" class="edittext" value="{{ article.amount }}" onkeyup="check('{{ article.arthash }}',{{ article.amount }},this.value);" onFocus="hideMessageBox();this.select();" onBlur="hideMessageBox();"/></td>
+                    {% else %}
+                        <td valign="top" class="{{ listclass }}"><input name="{{ article.arthash }}" type="text" maxlength="4" style="width: 40px;" class="edittext" value="{{ article.amount }}" disabled="disabled"/></td>
+                    {% endif %}
+                    <td valign="top" class="{{ listclass }}">{{ article.artnum }}</td>
+                    <td valign="top" class="{{ listclass }}">{{ article.title|striptags }}{% if article.description_addition != false %} - ({{ article.description_addition }}){% endif %}</td>
+                    <td valign="top" class="{{ listclass }}">{{ article.unitprice|number_format(2, ",", "") }}</td>
+                    <td valign="top" class="{{ listclass }}">{{ article.vat }} %</td>
+                    <td valign="top" class="{{ listclass }}">{{ article.totalprice|number_format(2, ",", "") }} {{ article.currency }}</td>
+                    <td valign="top" class="{{ listclass }}">{{ article.ordered }}</td>
+                    <td valign="top" class="{{ listclass }}">{{ article.shipped }}</td>
+                    <td valign="top" class="{{ listclass }}">{{ article.cancelled }}</td>
+                    <td valign="top" class="{{ listclass }}">{{ article.returned }}</td>
+                <tr/>
+                {% if blWhite == "2" %}
+                    {% set blWhite = "" %}
+                {% else %}
+                    {% set blWhite = "2" %}
+                {% endif %}
+            {% endfor %}
+            <tr>
+                <td valign="top" class="{{ listclass }}">&nbsp;</td>
+                <td valign="top" class="{{ listclass }}">&nbsp;</td>
+                <td valign="top" class="{{ listclass }}">&nbsp;</td>
+                <td valign="top" class="{{ listclass }}">&nbsp;</td>
+                <td valign="top" class="{{ listclass }}">&nbsp;</td>
+                <td valign="top" class="{{ listclass }}">{{ pi_total_amount|number_format(2, ",", "") }} {{ article.currency }}</td>
+                <td valign="top" class="{{ listclass }}">&nbsp;</td>
+                <td valign="top" class="{{ listclass }}">&nbsp;</td>
+                <td valign="top" class="{{ listclass }}">&nbsp;</td>
+                <td valign="top" class="{{ listclass }}">&nbsp;</td>
+            <tr/>
+        </table>
+        <div id="waitingWheel" class="popup" style="visibility:hidden;background: none repeat scroll 0 0 #FFFFFF;border: 1px solid #000000;display: block; height: 150px;left: 50%;margin-left: -135px;margin-top: -75px; padding: 10px;position: fixed;top: 50%;width: 270px;z-index: 2000;">
+            <p>Bitte warten, Ihre Anfrage wird gerade &uuml;berpr&uuml;ft. Schlie&szlig;en Sie diese Seite nicht und klicken Sie nicht "Reload" bis die &Uuml;berpr&uuml;fung abgeschlossen ist. Dies wird ca. 10 Sekunden dauern.</p>
+            <center><img class="waitIMG" src="{{ oViewConf.getModuleUrl('ratepay') }}admin/img/ajax-loader.gif" alt="wait"/></center>
+        </div>
+        {% if storniert_versendet == "1" %}
+            <input type="submit" name="deliver" value="&nbsp;&nbsp;{{ translate({ ident: "PI_RATEPAY_SHIPPING" }) }}&nbsp;&nbsp;" class="edittext" onClick="setFnc('deliver', 'articleList'); showWaitingWheel();">
+            <input type="submit" name="cancel" value="&nbsp;&nbsp;{{ translate({ ident: "PI_RATEPAY_CANCELLING" }) }}&nbsp;&nbsp;" class="edittext" onClick="setFnc('cancel', 'articleList');">
+        {% else %}
+            <input type="submit" name="deliver" value="&nbsp;&nbsp;{{ translate({ ident: "PI_RATEPAY_SHIPPING" }) }}&nbsp;&nbsp;" class="edittext" disabled="disabled">
+            <input type="submit" name="cancel" value="&nbsp;&nbsp;{{ translate({ ident: "PI_RATEPAY_CANCELLING" }) }}&nbsp;&nbsp;" class="edittext" disabled="disabled">
+        {% endif %}
+    </form>
+</fieldset>
+
+{% set retourniert = "0" %}
+{% for article in articleList %}
+    {% if article.shipped - article.returned > 0 %}
+        {% set retourniert = "1" %}
+    {% endif %}
+{% endfor %}
+
+<br/>
+<fieldset title="{{ translate({ ident: "PI_RATEPAY_RETURNING_TABLE_HEAD" }) }}" style="padding-left: 5px; padding-right: 5px;">
+    <legend>{{ translate({ ident: "PI_RATEPAY_RETURNING_TABLE_HEAD" }) }}</legend><br/>
+    <form action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+        {{ oViewConf.getHiddenSid()|raw }}
+        <input type="hidden" name="cur" value="{{ oCurr.id }}">
+        <input type="hidden" name="oxid" value="{{ oxid }}">
+        <input type="hidden" name="cl" value="RatepayDetails">
+        <input type="hidden" name="fnc" value="retoure">
+
+        {% set blWhite = "" %}
+        <table cellspacing="0" cellpadding="0" border="0" width="98%">
+            <tr>
+                <td class="listheader first">{{ translate({ ident: "PI_RATEPAY_QUANTITY" }) }}</td>
+                <td class="listheader">{{ translate({ ident: "PI_RATEPAY_ARTICLENR" }) }}</td>
+                <td class="listheader">{{ translate({ ident: "PI_RATEPAY_ARTICLENAME" }) }}</td>
+                <td class="listheader">{{ translate({ ident: "PI_RATEPAY_SHIPPED" }) }}</td>
+                <td class="listheader">{{ translate({ ident: "PI_RATEPAY_RETURNED" }) }}</td>
+
+            </tr>
+            {% for article in articleList %}
+                {% set listclass = "listitem"~blWhite %}
+                <tr>
+                    {% if article.shipped - article.returned > 0 %}
+                        <td valign="top" class="{{ listclass }}"><input name="{{ article.arthash }}" type="text" maxlength="4" style="width: 40px;" class="edittext" value="{{ article.shipped - article.returned }}" onkeyup="check_shipped('{{ article.arthash }}',{{ article.shipped - article.returned }},this.value);" onFocus="hideMessageBox();this.select();" onBlur="hideMessageBox();"/></td>
+                    {% else %}
+                        <td valign="top" class="{{ listclass }}"><input name="{{ article.arthash }}" type="text" maxlength="4" style="width: 40px;" class="edittext" value="0" disabled="disabled" /></td>
+                    {% endif %}
+                    <td valign="top" class="{{ listclass }}">{{ article.artnum }}</td>
+                    <td valign="top" class="{{ listclass }}">{{ article.title|striptags }}{% if article.description_addition != false %} - ({{ article.description_addition }}){% endif %}</td>
+                    <td valign="top" class="{{ listclass }}">{{ article.shipped }}</td>
+                    <td valign="top" class="{{ listclass }}">{{ article.returned }}</td>
+                <tr/>
+                {% if blWhite == "2" %}
+                    {% set blWhite = "" %}
+                {% else %}
+                    {% set blWhite = "2" %}
+                {% endif %}
+            {% endfor %}
+        </table>
+        {% if retourniert == "1" %}
+            <input type="submit" name="return" value="&nbsp;&nbsp;{{ translate({ ident: "PI_RATEPAY_RETURNING" }) }}&nbsp;&nbsp;" class="edittext"/>
+        {% else %}
+            <input type="submit" name="return" value="&nbsp;&nbsp;{{ translate({ ident: "PI_RATEPAY_RETURNING" }) }}&nbsp;&nbsp;" class="edittext" disabled="disabled"/>
+        {% endif %}
+    </form>
+</fieldset>
+
+<br/>
+<fieldset title="{{ translate({ ident: "PI_RATEPAY_GOODWILL" }) }}" style="padding-left: 5px; padding-right: 5px;">
+    <legend>{{ translate({ ident: "PI_RATEPAY_GOODWILL" }) }}</legend><br/>
+    <form action="{{ oViewConf.getSelfLink()|raw }}" method="post">
+        {{ oViewConf.getHiddenSid()|raw }}
+        <input type="hidden" name="cur" value="{{ oCurr.id }}">
+        <input type="hidden" name="oxid" value="{{ oxid }}">
+        <input type="hidden" name="cl" value="RatepayDetails">
+        <input type="hidden" name="fnc" value="credit">
+        <span>{{ translate({ ident: "PI_RATEPAY_VALUE" }) }}: </span>
+        <input id='voucherAmount' type='text' style="float:none;" maxlength='4' name='voucherAmount' size='4' value='0' onkeyup="check_voucher('{{ pi_total_amount }}');" onFocus="this.select();">{{ translate({ ident: "PI_RATEPAY_KOMMA" }) }}<input style='float:none;' id='voucherAmountKomma' type='text' maxlength='2' name='voucherAmountKomma' size='2' value='00' onkeyup="check_voucher('{{ pi_total_amount }}');" onFocus="hideMessageBox();this.select();" onBlur="hideMessageBox();">{{ article.currency }}<br><br>
+        <input type='submit' name='voucher' value='&nbsp;&nbsp;{{ translate({ ident: "PI_RATEPAY_VOUCHER" }) }}&nbsp;&nbsp;'">
+    </form>
+</fieldset>
+{% set historyCount = "0" %}
+{% for history in historyList %}
+    {% set historyCount = "1" %}
+{% endfor %}
+<br/>
+<fieldset title="{{ translate({ ident: "PI_RATEPAY_HISTORY" }) }}" style="padding-left: 5px; padding-right: 5px;">
+    <legend>{{ translate({ ident: "PI_RATEPAY_HISTORY" }) }}</legend><br/>
+    {% set blWhite = "" %}
+    <table cellspacing="0" cellpadding="0" border="0" width="98%">
+        <tr>
+            <td class="listheader first">{{ translate({ ident: "PI_RATEPAY_QUANTITY" }) }}</td>
+            <td class="listheader">{{ translate({ ident: "PI_RATEPAY_ARTICLENR" }) }}</td>
+            <td class="listheader">{{ translate({ ident: "PI_RATEPAY_ARTICLENAME" }) }}</td>
+            <td class="listheader">{{ translate({ ident: "PI_RATEPAY_ACTION" }) }}</td>
+            <td class="listheader">{{ translate({ ident: "PI_RATEPAY_DATE" }) }}</td>
+        </tr>
+        {% for history in historyList %}
+            {% set listclass = "listitem"~blWhite %}
+            <tr>
+                <td valign="top" class="{{ listclass }}">{{ history.quantity }}</td>
+                <td valign="top" class="{{ listclass }}">{{ history.article_number }}</td>
+                <td valign="top" class="{{ listclass }}">{{ history.title|striptags }}</td>
+                <td valign="top" class="{{ listclass }}">
+                    {% if history.method == "CONFIRMATION_DELIVER" %}
+                        {{ translate({ ident: "PI_RATEPAY_CONFIRMDELIVER" }) }}
+                    {% endif %}
+                    {% if history.method == "PAYMENT_CHANGE" %}
+                        {% if history.subtype == "credit" %}
+                            {{ translate({ ident: "PI_RATEPAY_GOODWILL" }) }}
+                        {% endif %}
+                        {% if "return" in history.subtype %}
+                            {{ translate({ ident: "PI_RATEPAY_RETURN" }) }}
+                        {% endif %}
+                        {% if "cancellation" in history.subtype %}
+                            {{ translate({ ident: "PI_RATEPAY_CANCELLATION" }) }}
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td valign="top" class="{{ listclass }}">{{ history.date }}</td>
+            <tr/>
+            {% if blWhite == "2" %}
+                {% set blWhite = "" %}
+            {% else %}
+                {% set blWhite = "2" %}
+            {% endif %}
+        {% endfor %}
+    </table>
+</fieldset>
+{% include "bottomitem.html.twig" %}
+<script type="text/javascript">
+    function setFnc(fnc, form) {
+        var form = document.getElementById(form);
+        form.fnc.value = fnc;
+        form.submit();
+    }
+    function check(arthash, totalamount, amount) {
+        var sub = document.getElementsByName(arthash)[0].value;
+        if(sub.match(/^[0-9]{1,4}$/i)) {
+            if(totalamount < amount) {
+                document.getElementById('message').style.visibility = 'visible';
+                document.getElementsByName(arthash)[0].value = totalamount;
+            }
+        } else {
+            document.getElementById('message').style.visibility = 'visible';
+            document.getElementsByName(arthash)[0].value = totalamount;
+        }
+    }
+    function check_shipped(arthash, totalamount, amount) {
+        var sub = document.getElementsByName(arthash)[1].value;
+        if(sub.match(/^[0-9]{1,4}$/i)) {
+            if(totalamount < amount) {
+                document.getElementById('message').style.visibility = 'visible';
+                document.getElementsByName(arthash)[1].value = totalamount;
+            }
+        } else {
+            document.getElementById('message').style.visibility = 'visible';
+            document.getElementsByName(arthash)[1].value = totalamount;
+        }
+    }
+    function check_voucher(totalamount) {
+        var vouchertotal = 0;
+        var sub = document.getElementById('voucherAmount').value;
+        var subKomma = document.getElementById('voucherAmountKomma').value;
+        if(sub.match(/^[0-9]{1,4}$/i)) {
+            vouchertotal = parseInt(sub);
+            if(vouchertotal > totalamount) {
+                document.getElementById('voucherAmount').value = "0";
+                document.getElementById('message').style.visibility = 'visible';
+            } else {
+                if(subKomma.match(/^[0-9]{1,2}$/i)) {
+                    vouchertotal = sub + "." + subKomma;
+                    vouchertotal = parseFloat(vouchertotal);
+                    totalamount = parseFloat(totalamount);
+                    if(vouchertotal > totalamount) {
+                        document.getElementById('message').style.visibility = 'visible';
+                        document.getElementById('voucherAmountKomma').value = "00";
+                    }
+                } else {
+                    document.getElementById('message').style.visibility = 'visible';
+                    document.getElementById('voucherAmountKomma').value = "00";
+                }
+            }
+        } else {
+            document.getElementById('message').style.visibility = 'visible';
+            document.getElementById('voucherAmount').value = "0";
+        }
+    }
+    function hideMessageBox() {
+        document.getElementById('message').style.visibility = 'hidden';
+    }
+</script>

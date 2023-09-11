@@ -5,6 +5,14 @@ namespace pi\ratepay\Application\Controller\Admin;
 use OxidEsales\Eshop\Application\Controller\Admin\AdminListController;
 use OxidEsales\Eshop\Core\ShopVersion;
 
+/**
+ *
+ * Copyright (c) Ratepay GmbH
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 class AdminListBase extends AdminListController
 {
     /**
@@ -14,11 +22,11 @@ class AdminListBase extends AdminListController
     public function render() {
         parent::render();
         $sVersion = ShopVersion::getVersion();
-        $sNameConcat = $this->_piGetConcatByVersion();
+        $sNameConcat = $this->piGetConcatByVersion();
 
         $this->_aViewData['shopversion'] = $sVersion;
         $this->_aViewData['nameconcat'] = $sNameConcat;
-        $this->_aViewData['where'] = $this->_piGetEnteredValues();
+        $this->_aViewData['where'] = $this->piGetEnteredValues();
 
         return $this->_sThisTemplate;
     }
@@ -28,15 +36,15 @@ class AdminListBase extends AdminListController
      *
      * @return array
      */
-    protected function _piGetEnteredValues()
+    protected function piGetEnteredValues()
     {
-        $aReturn = array();
+        $aReturn = [];
         $aWhere = $this->buildWhere();
         foreach ($aWhere as $sKey => $sValue) {
             $aValues = explode(' ', $sValue);
             $sValue = $aValues[0];
             $aSplittedKey = explode(".", $sKey);
-            $sValue = $this->_piDecodeUrlSearchTerm($sValue);
+            $sValue = $this->piDecodeUrlSearchTerm($sValue);
             $aReturn[$aSplittedKey[0]][$aSplittedKey[1]] = $sValue;
         }
         return $aReturn;
@@ -48,7 +56,7 @@ class AdminListBase extends AdminListController
      * @param string $sInput
      * @return string
      */
-    protected function _piDecodeUrlSearchTerm($sInput)
+    protected function piDecodeUrlSearchTerm($sInput)
     {
         $sOutput = substr($sInput, 1,-1);
         $sOutput = urldecode($sOutput);
@@ -63,7 +71,7 @@ class AdminListBase extends AdminListController
      *
      * @return string
      */
-    protected function _piGetConcatByVersion()
+    protected function piGetConcatByVersion()
     {
         $sConcat = "][";
         return $sConcat;

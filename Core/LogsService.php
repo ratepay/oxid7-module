@@ -4,24 +4,17 @@ namespace pi\ratepay\Core;
 
 use OxidEsales\Eshop\Core\Base;
 use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
 use pi\ratepay\Application\Model\Logs;
 use pi\ratepay\Application\Model\LogsList;
 
 /**
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (c) Ratepay GmbH
  *
- * @category  PayIntelligent
- * @package   PayIntelligent_RatePAY
- * @copyright (C) 2011 PayIntelligent GmbH  <http://www.payintelligent.de/>
- * @license	http://www.gnu.org/licenses/  GNU General Public License 3
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 /**
@@ -79,7 +72,7 @@ class LogsService extends Base
         $util = oxNew(Utilities::class);
         $paymentMethod =  $util->getPaymentMethod($paymentMethod);
 
-        $logging = $this->_getLogSettings();
+        $logging = $this->getLogSettings();
 
         if ($logging == 1) {
             $requestXml = $trans->getRequestRaw();
@@ -113,7 +106,7 @@ class LogsService extends Base
 
             $oUtilsDate = Registry::get("oxUtilsDate");
 
-            $logEntry->assign(array(
+            $logEntry->assign([
                 'order_number'    => $orderId,
                 'transaction_id'  => $transactionId,
                 'payment_method'  => $paymentMethod,
@@ -131,7 +124,7 @@ class LogsService extends Base
                 'status_code'     => $statusCode,
                 'reference'       => $reference,
                 'date'            => date('Y-m-d H:i:s', $oUtilsDate->getTime())
-            ));
+            ]);
 
             $logEntry->save();
             return $logEntry;
@@ -160,10 +153,12 @@ class LogsService extends Base
      * Get RatePAY Log Settings
      * @return int
      */
-    private function _getLogSettings()
+    private function getLogSettings()
     {
-        $oConfig = Registry::getConfig();
-        $iRPLogging = (int) $oConfig->getConfigParam('blRPLogging');
+        $moduleSettingService = ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(ModuleSettingServiceInterface::class);
+        $iRPLogging = (int) $moduleSettingService->getBoolean('blRPLogging', 'ratepay');
 
         return $iRPLogging;
     }

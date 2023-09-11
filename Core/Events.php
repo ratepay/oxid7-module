@@ -7,6 +7,14 @@ use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Core\DatabaseProvider;
 
 /**
+ *
+ * Copyright (c) Ratepay GmbH
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+/**
  * Eventhandler for module activation and deactivation.
  */
 class Events
@@ -143,12 +151,12 @@ class Events
           UNIQUE INDEX `UNQ_RATEPAY_CUSTOMER_ID_PAYMENT_METHOD` (`USERID` ASC, `PAYMENT_METHOD` ASC)
         ) ENGINE = MYISAM CHARACTER SET utf8 COLLATE utf8_general_ci;";
 
-    public static $aPaymentMethods = array(
+    public static $aPaymentMethods = [
         'pi_ratepay_rechnung' => 'Ratepay Rechnung',
         'pi_ratepay_rate' => 'Ratepay Rate',
         'pi_ratepay_rate0' => 'Ratepay 0% Finanzierung',
         'pi_ratepay_elv' => 'Ratepay SEPA-Lastschrift',
-    );
+    ];
 
     /**
      * Execute action on activate event.
@@ -195,12 +203,12 @@ class Events
     public static function clearTmp()
     {
         $sTmpDir = getShopBasePath() . "/tmp/";
-        $sSmartyDir = $sTmpDir . "smarty/";
+        $sTwigDir = $sTmpDir . "template_cache/";
 
         foreach (glob($sTmpDir . "*.txt") as $sFileName) {
             unlink($sFileName);
         }
-        foreach (glob($sSmartyDir . "*.php") as $sFileName) {
+        foreach (glob($sTwigDir . "*.php") as $sFileName) {
             unlink($sFileName);
         }
     }
@@ -214,11 +222,11 @@ class Events
     {
         foreach (self::$aPaymentMethods as $sPaymentOxid => $sPaymentName) {
             //INSERT PAYMENT METHOD
-            self::insertRowIfNotExists('oxpayments', array('OXID' => $sPaymentOxid), "INSERT INTO oxpayments (OXID, OXACTIVE, OXDESC, OXADDSUM, OXADDSUMTYPE, OXFROMBONI, OXFROMAMOUNT, OXTOAMOUNT, OXVALDESC, OXCHECKED, OXDESC_1, OXVALDESC_1, OXDESC_2, OXVALDESC_2, OXDESC_3, OXVALDESC_3, OXLONGDESC, OXLONGDESC_1, OXLONGDESC_2, OXLONGDESC_3, OXSORT) VALUES ('{$sPaymentOxid}', 1, '{$sPaymentName}', 0, 'abs', 0, 0, 999999, '', 1, '{$sPaymentName}', '', '', '', '', '', '', '', '', '', 0)");
-            self::insertRowIfNotExists('oxobject2payment', array('OXPAYMENTID' => $sPaymentOxid, 'OXTYPE' => 'oxdelset'), "INSERT INTO oxobject2payment(OXID,OXPAYMENTID,OXOBJECTID,OXTYPE) values (MD5(CONCAT(NOW(),RAND())), '{$sPaymentOxid}', 'oxidstandard', 'oxdelset');");
+            self::insertRowIfNotExists('oxpayments', ['OXID' => $sPaymentOxid], "INSERT INTO oxpayments (OXID, OXACTIVE, OXDESC, OXADDSUM, OXADDSUMTYPE, OXFROMBONI, OXFROMAMOUNT, OXTOAMOUNT, OXVALDESC, OXCHECKED, OXDESC_1, OXVALDESC_1, OXDESC_2, OXVALDESC_2, OXDESC_3, OXVALDESC_3, OXLONGDESC, OXLONGDESC_1, OXLONGDESC_2, OXLONGDESC_3, OXSORT) VALUES ('{$sPaymentOxid}', 1, '{$sPaymentName}', 0, 'abs', 0, 0, 999999, '', 1, '{$sPaymentName}', '', '', '', '', '', '', '', '', '', 0)");
+            self::insertRowIfNotExists('oxobject2payment', ['OXPAYMENTID' => $sPaymentOxid, 'OXTYPE' => 'oxdelset'], "INSERT INTO oxobject2payment(OXID,OXPAYMENTID,OXOBJECTID,OXTYPE) values (MD5(CONCAT(NOW(),RAND())), '{$sPaymentOxid}', 'oxidstandard', 'oxdelset');");
         }
 
-        self::insertRowIfNotExists('oxvoucherseries', array('OXID' => 'pi_ratepay_voucher'), "INSERT INTO `oxvoucherseries` (OXID,OXSHOPID,OXSERIENR,OXSERIEDESCRIPTION,OXDISCOUNT,OXDISCOUNTTYPE,OXBEGINDATE,OXENDDATE,OXALLOWSAMESERIES,OXALLOWOTHERSERIES,OXALLOWUSEANOTHER,OXMINIMUMVALUE,OXCALCULATEONCE,OXTIMESTAMP) VALUES ('pi_ratepay_voucher', 1, 'Ratepay Gutschrift-Platzhalter', 'Ratepay Gutschrift-Platzhalter', 0.00, 'absolute', '2010-01-01 00:00:01', '2099-01-01 00:00:01', 1, 1, 1, 0.00, 0, NOW());");
+        self::insertRowIfNotExists('oxvoucherseries', ['OXID' => 'pi_ratepay_voucher'], "INSERT INTO `oxvoucherseries` (OXID,OXSHOPID,OXSERIENR,OXSERIEDESCRIPTION,OXDISCOUNT,OXDISCOUNTTYPE,OXBEGINDATE,OXENDDATE,OXALLOWSAMESERIES,OXALLOWOTHERSERIES,OXALLOWUSEANOTHER,OXMINIMUMVALUE,OXCALCULATEONCE,OXTIMESTAMP) VALUES ('pi_ratepay_voucher', 1, 'Ratepay Gutschrift-Platzhalter', 'Ratepay Gutschrift-Platzhalter', 0.00, 'absolute', '2010-01-01 00:00:01', '2099-01-01 00:00:01', 1, 1, 1, 0.00, 0, NOW());");
     }
 
     /**
@@ -445,21 +453,21 @@ class Events
         // Changes from 5.0.8 and later
 
         // OX-42 renaming/rebranding
-        $aRenamingCriteria = array(
+        $aRenamingCriteria = [
             'pi_ratepay_rechnung' => 'RatePAY Rechnung',
             'pi_ratepay_rate' => 'RatePAY Rate',
             'pi_ratepay_elv' => 'RatePAY SEPA-Lastschrift',
-        );
+        ];
         foreach (self::$aPaymentMethods as $sCode => $sName) {
             if (!isset($aRenamingCriteria[$sCode])) {
                 continue;
             }
             self::updateDataIfExists(
                 'oxpayments',
-                array('OXID' => $sCode),
+                ['OXID' => $sCode],
                 'OXDESC',
                 $sName,
-                array('OXDESC' => $aRenamingCriteria[$sCode])
+                ['OXDESC' => $aRenamingCriteria[$sCode]]
             );
         }
     }

@@ -2,24 +2,16 @@
 
 namespace pi\ratepay\Core;
 
-use OxidEsales\Eshop\Core\DatabaseProvider;
 use OxidEsales\Eshop\Core\Model\BaseModel;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 
 /**
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (c) Ratepay GmbH
  *
- * @category  PayIntelligent
- * @package   PayIntelligent_RatePAY
- * @copyright (C) 2011 PayIntelligent GmbH  <http://www.payintelligent.de/>
- * @license	http://www.gnu.org/licenses/  GNU General Public License 3
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 /**
@@ -62,15 +54,15 @@ class DetailsViewData extends BaseModel
      */
     public function getPreparedOrderArticles($blIsDisplayList = false)
     {
-        $articleList = $this->_piGetOrderArticleList();
-        $articleList = $this->_piAddSpecialCosts($articleList, 'oxwrapping', 'Wrapping Cost');
-        $articleList = $this->_piAddSpecialCosts($articleList, 'oxgiftcard', 'Giftcard Cost');
-        $articleList = $this->_piAddSpecialCosts($articleList, 'oxpayment', 'Payment Costs');
-        $articleList = $this->_piAddSpecialCosts($articleList, 'oxdelivery', 'Delivery Costs');
-        $articleList = $this->_piAddSpecialCosts($articleList, 'oxtsprotection', 'TS Protection Cost');
-        $articleList = $this->_piAddDiscounts($articleList);
-        $articleList = $this->_piAddVouchers($articleList, $blIsDisplayList);
-        $articleList = $this->_piAddCredit($articleList);
+        $articleList = $this->piGetOrderArticleList();
+        $articleList = $this->piAddSpecialCosts($articleList, 'oxwrapping', 'Wrapping Cost');
+        $articleList = $this->piAddSpecialCosts($articleList, 'oxgiftcard', 'Giftcard Cost');
+        $articleList = $this->piAddSpecialCosts($articleList, 'oxpayment', 'Payment Costs');
+        $articleList = $this->piAddSpecialCosts($articleList, 'oxdelivery', 'Delivery Costs');
+        $articleList = $this->piAddSpecialCosts($articleList, 'oxtsprotection', 'TS Protection Cost');
+        $articleList = $this->piAddDiscounts($articleList);
+        $articleList = $this->piAddVouchers($articleList, $blIsDisplayList);
+        $articleList = $this->piAddCredit($articleList);
 
         return $articleList;
     }
@@ -99,41 +91,36 @@ class DetailsViewData extends BaseModel
      *
      * @return array
      */
-    protected function _piGetOrderArticleList()
+    protected function piGetOrderArticleList()
     {
-        $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
-        $articleList = array();
-
-        # Get order articles
-        $articlesSql = "SELECT
-              oo.OXCURRENCY,
-              oa.OXID,
-              oa.OXARTID,
-              oa.OXARTNUM,
-              oa.OXVAT,
-              oa.OXBPRICE,
-              oa.OXNPRICE,
-              oa.OXTITLE,
-              oa.OXNETPRICE,
-              oa.OXAMOUNT,
-              oa.OXPERSPARAM,
-              prrod.ORDERED,
-              prrod.CANCELLED,
-              prrod.RETURNED,
-              prrod.SHIPPED,
-              prrod.UNIQUE_ARTICLE_NUMBER,
-              if(oa.OXSELVARIANT != '',concat(oa.OXTITLE,', ',oa.OXSELVARIANT),oa.OXTITLE) as TITLE
-            FROM
-                `oxorder` AS oo
-            INNER JOIN
-                `oxorderarticles` AS oa ON oa.oxorderid = oo.oxid
-            INNER JOIN
-                (SELECT * FROM ".$this->pi_ratepay_order_details." WHERE ORDER_NUMBER = '{$this->_orderId}') AS prrod
-            WHERE
-                oo.oxid = '{$this->_orderId}' AND
-                oa.oxid = prrod.UNIQUE_ARTICLE_NUMBER
-            GROUP BY prrod.oxid";
-        $aRows = $oDb->getAll($articlesSql);
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select('oo.OXCURRENCY',
+                'oa.OXID',
+                'oa.OXARTID',
+                'oa.OXARTNUM',
+                'oa.OXVAT',
+                'oa.OXBPRICE',
+                'oa.OXNPRICE',
+                'oa.OXTITLE',
+                'oa.OXNETPRICE',
+                'oa.OXAMOUNT',
+                'oa.OXPERSPARAM',
+                'prrod.ORDERED',
+                'prrod.CANCELLED',
+                'prrod.RETURNED',
+                'prrod.SHIPPED',
+                'prrod.UNIQUE_ARTICLE_NUMBER',
+                "if(oa.OXSELVARIANT != '',concat(oa.OXTITLE,', ',oa.OXSELVARIANT),oa.OXTITLE) as TITLE")
+            ->from('oxorder', 'oo')
+            ->innerJoin('oo', 'oxorderarticles', 'oa', 'oa.oxorderid = oo.oxid')
+            ->innerJoin('oo', "(SELECT * FROM " . $this->pi_ratepay_order_details . " WHERE ORDER_NUMBER = '{$this->_orderId}') AS prrod WHERE oo.oxid = '{$this->_orderId}' AND oa.oxid = prrod.UNIQUE_ARTICLE_NUMBER", '')
+            ->groupBy('prrod.oxid');
+        $aRows = $oQueryBuilder->execute();
+        $aRows = $aRows->fetchAllAssociative();
 
         foreach ($aRows as $aRow) {
             $iAmount = $aRow['ORDERED'] - $aRow['SHIPPED'] - $aRow['CANCELLED'];
@@ -182,9 +169,9 @@ class DetailsViewData extends BaseModel
      * @param $title
      * @return array
      */
-    protected function _piAddSpecialCosts($articleList, $ident, $title)
+    protected function piAddSpecialCosts($articleList, $ident, $title)
     {
-        $aRow = $this->_piGetOrderSpecialCostsQuery($ident);
+        $aRow = $this->piGetOrderSpecialCostsQuery($ident);
 
         if ($aRow['PRICE'] > 0) {
             $listEntry['oxid'] = "";
@@ -231,31 +218,33 @@ class DetailsViewData extends BaseModel
      * @param $articleList
      * @return array
      */
-    protected function _piAddDiscounts($articleList)
+    protected function piAddDiscounts($articleList)
     {
-        $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
-
-        $sQuery = "
-            SELECT
-                oo.oxcurrency,
-                od.oxid AS ARTID,
-                od.oxtitle AS TITLE,
-                oo.oxdiscount AS PRICE,
-                prrod.ordered AS ORDERED,
-                prrod.cancelled AS CANCELLED,
-                prrod.returned AS RETURNED,
-                prrod.shipped AS SHIPPED,
-                prrod.unique_article_number
-            FROM
-                `oxorder` oo,
-                `oxdiscount` od,
-                " . $this->pi_ratepay_order_details . " prrod
-            WHERE
-                prrod.order_number = '" . $this->_orderId . "'
-                AND prrod.article_number = od.oxid
-                AND oo.oxid = prrod.order_number";
-
-        $aRow = $oDb->getRow($sQuery);
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select(
+                'oo.oxcurrency',
+                'od.oxid AS ARTID',
+                'od.oxtitle AS TITLE',
+                'oo.oxdiscount AS PRICE',
+                'prrod.ordered AS ORDERED',
+                'prrod.cancelled AS CANCELLED',
+                'prrod.returned AS RETURNED',
+                'prrod.shipped AS SHIPPED',
+                'prrod.unique_article_number'
+            )
+            ->from('oxorder', 'oo')
+            ->from('oxdiscount', 'od')
+            ->from($this->pi_ratepay_order_details, 'prrod')
+            ->where('prrod.order_number = :orderid')
+            ->setParameter(':orderid', $this->_orderId)
+            ->andWhere('prrod.article_number = od.oxid')
+            ->andWhere('oo.oxid = prrod.order_number');
+        $aRow = $oQueryBuilder->execute();
+        $aRow = $aRow->fetchAllAssociative();
 
         if ($aRow['PRICE'] != 0) {
 
@@ -304,38 +293,40 @@ class DetailsViewData extends BaseModel
      * @param bool $blIsDisplayList
      * @return array
      */
-    protected function _piAddVouchers($articleList, $blIsDisplayList = false)
+    protected function piAddVouchers($articleList, $blIsDisplayList = false)
     {
-        $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
-
-        $sQuery = "
-            SELECT
-                oo.oxcurrency,
-                ov.oxdiscount AS price,
-                ov.oxdiscount as totaldiscount,
-                prrod.article_number AS artnr,
-                ov.oxvouchernr AS title,
-                prrod.ORDERED,
-                prrod.CANCELLED,
-                prrod.RETURNED,
-                prrod.SHIPPED,
-                prrod.unique_article_number,
-                ovs.OXSERIENR as seriesTitle,
-                ovs.OXSERIEDESCRIPTION as seriesDescription
-            FROM
-                `oxorder` oo,
-                `oxvouchers` ov,
-                " . $this->pi_ratepay_order_details . " prrod,
-                oxvoucherseries ovs
-            WHERE
-                prrod.order_number = '" . $this->_orderId . "' AND 
-                ov.oxorderid = prrod.order_number AND 
-                prrod.article_number = ov.oxid AND 
-                ovs.oxid = ov.OXVOUCHERSERIEID AND 
-                oo.oxid = prrod.order_number AND
-                ov.oxvoucherserieid != 'pi_ratepay_voucher'";
-
-        $aRows = $oDb->getAll($sQuery);
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select(
+                'oo.oxcurrency',
+                'ov.oxdiscount AS price',
+                'ov.oxdiscount as totaldiscount',
+                'prrod.article_number AS artnr',
+                'ov.oxvouchernr AS title',
+                'prrod.ORDERED',
+                'prrod.CANCELLED',
+                'prrod.RETURNED',
+                'prrod.SHIPPED',
+                'prrod.unique_article_number',
+                'ovs.OXSERIENR as seriesTitle',
+                'ovs.OXSERIEDESCRIPTION as seriesDescription'
+            )
+            ->from('oxorder', 'oo')
+            ->from('oxvouchers', 'ov')
+            ->from($this->pi_ratepay_order_details, 'prrod')
+            ->from('oxvoucherseries', 'ovs')
+            ->where('prrod.order_number = :ordernr')
+            ->setParameter(':ordernr', $this->_orderId)
+            ->andWhere('ov.oxorderid = prrod.order_number')
+            ->andWhere('prrod.article_number = ov.oxid')
+            ->andWhere('ovs.oxid = ov.OXVOUCHERSERIEID')
+            ->andWhere('oo.oxid = prrod.order_number')
+            ->andWhere("ov.oxvoucherserieid != 'pi_ratepay_voucher'");
+        $aRows = $oQueryBuilder->execute();
+        $aRows = $aRows->fetchAllAssociative();
 
         $dTotalprice = 0;
 
@@ -398,33 +389,36 @@ class DetailsViewData extends BaseModel
      * @param $articleList
      * @return array
      */
-    protected function _piAddCredit($articleList)
+    protected function piAddCredit($articleList)
     {
-        $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select(
+                'oo.oxcurrency',
+                'ov.oxdiscount AS price',
+                'prrod.article_number AS artnr',
+                'ov.oxvouchernr AS title',
+                'prrod.ORDERED',
+                'prrod.CANCELLED',
+                'prrod.RETURNED',
+                'prrod.unique_article_number',
+                'prrod.SHIPPED'
+            )
+            ->from('oxorder', 'oo')
+            ->from('oxvouchers', 'ov')
+            ->from($this->pi_ratepay_order_details, 'prrod')
+            ->where('prrod.order_number = :ordernr')
+            ->setParameter(':ordernr', $this->_orderId)
+            ->andWhere('ov.oxorderid = prrod.order_number')
+            ->andWhere("ov.oxvoucherserieid = 'pi_ratepay_voucher'")
+            ->andWhere('prrod.article_number = ov.oxid')
+            ->andWhere('oo.oxid = prrod.order_number');
+        $aRows = $oQueryBuilder->execute();
+        $aRows = $aRows->fetchAllAssociative();
 
-        $sQuery = "
-            SELECT
-                oo.oxcurrency,
-                ov.oxdiscount AS price,
-                prrod.article_number AS artnr,
-                ov.oxvouchernr AS title,
-                prrod.ORDERED,
-                prrod.CANCELLED,
-                prrod.RETURNED,
-                prrod.unique_article_number,
-                prrod.SHIPPED
-            FROM
-                `oxorder` oo,
-                `oxvouchers` ov,
-                " . $this->pi_ratepay_order_details . " prrod
-            WHERE
-            prrod.order_number = '" . $this->_orderId . "'
-            AND ov.oxorderid = prrod.order_number
-            AND ov.oxvoucherserieid = 'pi_ratepay_voucher'
-            AND prrod.article_number = ov.oxid
-            AND oo.oxid = prrod.order_number";
-
-        $aRows = $oDb->getAll($sQuery);
         foreach ($aRows as $aRow) {
             if ($aRow['price'] != 0) {
                 $listEntry['oxid'] = "";
@@ -463,24 +457,28 @@ class DetailsViewData extends BaseModel
      * @param $sIdent
      * @return mixed
      */
-    protected function _piGetOrderSpecialCostsQuery($sIdent)
+    protected function piGetOrderSpecialCostsQuery($sIdent)
     {
-        $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select(
+                'oo.oxcurrency',
+                'prrod.*'
+            )
+            ->from($this->pi_ratepay_order_details, 'prrod')
+            ->from('oxorder', 'oo')
+            ->where('prrod.order_number = :ordernr')
+            ->setParameter(':ordernr', $this->_orderId)
+            ->andWhere('prrod.article_number = :artnr')
+            ->setParameter(':artnr', $sIdent)
+            ->andWhere("oo.oxid = prrod.order_number");
+        $aRow = $oQueryBuilder->execute();
+        $aRow = $aRow->fetchAllAssociative();
 
-        $sQuery = "
-            SELECT 
-                oo.oxcurrency, 
-                prrod.* 
-            FROM 
-                {$this->pi_ratepay_order_details} prrod, oxorder oo
-            WHERE
-                prrod.order_number = '{$this->_orderId}' AND 
-                prrod.article_number = '{$sIdent}' AND 
-                oo.oxid = prrod.order_number";
-
-        $aRow = $oDb->getRow($sQuery);
-
-        return $aRow;
+        return $aRow[0];
     }
 
     /**
@@ -488,13 +486,21 @@ class DetailsViewData extends BaseModel
      * 
      * @return array|null
      */
-    protected function _piGetOrderValues() 
+    protected function piGetOrderValues()
     {
         if ($this->_orderValues === null) {
-            $oDb = DatabaseProvider::getDb(DatabaseProvider::FETCH_MODE_ASSOC);
             $orderId = $this->_orderId;
-            $orderSql = "SELECT * from `oxorder` where oxid='{$orderId}'";
-            $this->_orderValues = $oDb->getAll($orderSql);
+            $oContainer = ContainerFactory::getInstance()->getContainer();
+            /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+            $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+            $oQueryBuilder = $oQueryBuilderFactory->create();
+            $oQueryBuilder
+                ->select('*')
+                ->from('oxorder')
+                ->where('OXID = :oxid')
+                ->setParameter(':oxid', $orderId);
+            $aOrders = $oQueryBuilder->execute();
+            $this->_orderValues = $aOrders->fetchAllAssociative();
         }
         
         return $this->_orderValues;

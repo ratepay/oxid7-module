@@ -1,10 +1,29 @@
 @charset "utf-8";
+/**
+ *
+ * Copyright (c) Ratepay GmbH
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
+.pi_ratepay_form li {
+    margin-bottom: 12px;
+}
+#payment dt {
+    font-weight: 400;
+}
 .rpContainer {
-    width: 120%;
+    width: 100%;
 }
 .rp-installment-plan-description {
     display: none;
+    margin: 0;
+    margin-right: -60px;
+    padding-right: 80px;
+}
+#pi_ratepay_rate_pirpmain-cont .rpContainer {
+    margin-bottom: 10px;
 }
 #pi_ratepay_rate_rp-installment-plan-details, #pi_ratepay_rate0_rp-installment-plan-details {
     display: none;
@@ -18,16 +37,13 @@
 #pi_ratepay_rate_rp-show-installment-plan-details, #pi_ratepay_rate0_rp-show-installment-plan-details {
     display: block;
 }
-.rp-table-striped {
-    width: 90%;
-}
 .rp-menue,
 .rp-installment-plan-details,
 .rp-installment-plan-no-details {
     border-bottom: 1px solid #ddd;
-    width: 100%;
+    width: 99%;
     margin: 0px 3px;
-    padding: 13px 6px;
+    padding: 16px 6px;
 }
 
 .rp-installment-plan-details:nth-child(odd) {
@@ -43,13 +59,25 @@
     border-bottom: 1px solid #ddd;
     padding: 7px 0px;
 }
+#pi_ratepay_rate_pirpmain-cont .card {
+    border: 1px solid #ddd;
+    margin: 1px;
+    border-radius: 4px;
+}
 .text-center {
     padding: 10px 0px;
-    border-top: 1px solid #ddd
+}
+.pi_ratepay_inner {
+    margin-top: 6px;
 }
 .rp-sepa-form {
-    width: 80%;
     margin-left: 14px;
+}
+.rp-sepa-fields .rp-sepa-form {
+    margin: 0 8px 0 0;
+}
+.rp-sepa-fields .form-group {
+    margin-bottom: 18px;
 }
 .rp-sepa-table {
     margin-left: -10px;
@@ -58,10 +86,14 @@
     margin-left: 5px;
 }
 .rp-link {
-    margin-left: 20px
+    margin-left: 5px
+}
+#pi_ratepay_rate_rp-rate-elv .rp-link {
+    margin-right: 6px;
 }
 #pi_ratepay_rate_rp-sepa-agreement, #pi_ratepay_rate0_rp-sepa-agreement {
-    margin-left: 5px
+    margin-left: 5px;
+    margin-top: 19px;
 }
 .form-group input, .form-group label {
     margin-left: 5px

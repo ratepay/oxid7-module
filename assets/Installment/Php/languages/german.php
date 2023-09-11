@@ -1,12 +1,11 @@
 <?php
 
 /**
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @package pi_ratepay_rate_calculator
- * Code by PayIntelligent GmbH  <http://www.payintelligent.de/>
+ * Copyright (c) Ratepay GmbH
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 $rp_runtime_title = "Laufzeit";
 $rp_runtime_description = "Anzahl der monatlichen Raten";
@@ -84,3 +83,10 @@ $wcd_sepa_terms_block_3 = "Es gelten dabei die mit meinem Kreditinstitut vereinb
 $rp_sepa_terms_block_21 = "Ich erm&auml;chtige die Ratepay GmbH, Zahlungen von meinem Konto mittels Lastschrift einzuziehen. Zugleich weise ich mein Kreditinstitut an, die von der Ratepay GmbH auf mein Konto gezogenen Lastschriften einzul&ouml;sen.";
 $rp_sepa_terms_block_22 = "Hinweis: Ich kann innerhalb von acht Wochen, beginnend mit dem Belastungsdatum, die Erstattung des belasteten Betrages verlangen.";
 $rp_sepa_terms_block_23 = "Es gelten dabei die mit meinem Kreditinstitut vereinbarten Bedingungen.";
+$rp_creditor_info = "Mandatsreferenz und Gläubiger-ID wird Ihnen separat mitgeteilt.";
+$pi_lang_error = "<b>Fehler</b>";
+$pi_lang_server_off = "Die RatePAY-Server sind zur Zeit nicht erreichbar. Bitte versuchen Sie es sp&auml;ter noch einmal.";
+$pi_lang_wrong_value = "Falsche Eingabe. Bitte ändern Sie ihre Eingabe.";
+$pi_lang_no_value = "Es wurde kein Betrag eingegeben!";
+$pi_lang_request_error_else = "Ein Fehler ist aufgetreten. Bitte kontaktieren Sie den Shopbetreiber.";
+$pi_lang_config_error_else = "Ein Fehler ist aufgetreten. Bitte kontaktieren Sie umgehend den Shopbetreiber.";

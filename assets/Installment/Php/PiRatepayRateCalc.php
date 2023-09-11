@@ -8,12 +8,11 @@ use pi\ratepay\Core\ModelFactory;
 use pi\ratepay\Core\Utilities;
 
 /**
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @package pi_ratepay_rate_calculator
- * Code by PayIntelligent GmbH  <http://www.payintelligent.de/>
+ * Copyright (c) Ratepay GmbH
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 
@@ -100,7 +99,7 @@ class PiRatepayRateCalc extends PiRatepayRateCalcBase
             $thousandSepeartor = ',';
         }
 
-        $resultArray = array();
+        $resultArray = [];
         $resultArray['totalAmount'] = number_format((double) $this->getDetailsTotalAmount(), 2, $decimalSeperator, $thousandSepeartor).' '. $currency;
         $resultArray['amount'] = number_format((double) $this->getDetailsAmount(), 2, $decimalSeperator, $thousandSepeartor).' '. $currency;
         $resultArray['interestRate'] = number_format((double) $this->getDetailsInterestRate(), 2, $decimalSeperator, $thousandSepeartor);
@@ -131,7 +130,7 @@ class PiRatepayRateCalc extends PiRatepayRateCalcBase
             $oSession->getVariable('pi_ratepay_rate_usr_country');
         $settings = oxNew(Settings::class);
         $settings->loadByType(Utilities::getPaymentMethod($this->paymentMethod), $sShopId, $sRatePayUsrCountry);
-        $allowedRuntimes = array();
+        $allowedRuntimes = [];
         $basketAmount = (float)$this->getRequestAmount();
         $rateMinNormal = $settings->pi_ratepay_settings__min_rate->rawValue;
         $runTimes = json_decode($settings->pi_ratepay_settings__month_allowed->rawValue);
@@ -181,14 +180,14 @@ class PiRatepayRateCalc extends PiRatepayRateCalcBase
     {
         $modelFactory = oxNew(ModelFactory::class);
         $request_reason_msg = 'serveroff';
-        $calculationData = array(
+        $calculationData = [
             'requestAmount'     => $this->getRequestAmount(),
             'interestRate'      => $this->getRequestInterestRate(),
             'requestSubtype'    => $subtype,
             'requestValue'      => $this->getRequestCalculationValue(),
             'paymentFirstday'   => $this->getRequestFirstday(),
             'bankAccount'       => $this->getRequestIban()
-        );
+        ];
 
         $shopId = Registry::getSession()->getVariable('shopId');
         $settings = oxNew(Settings::class);

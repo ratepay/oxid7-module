@@ -2,11 +2,15 @@
 
 namespace pi\ratepay\Core;
 
-use OxidEsales\EshopCommunity\Core\DatabaseProvider;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ *
+ * Copyright (c) Ratepay GmbH
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 /**
@@ -21,18 +25,18 @@ class Utilities
      * Static array of RatePAY payment methods.
      * @var array
      */
-    public static $_RATEPAY_PAYMENT_METHOD = array(
+    public static $_RATEPAY_PAYMENT_METHOD = [
         'pi_ratepay_rechnung',
         'pi_ratepay_rate',
         'pi_ratepay_rate0',
         'pi_ratepay_elv'
-    ); // 'pi_ratepay_vorkasse'
-    public static $_RATEPAY_PAYMENT_METHOD_NAMES = array(
+    ]; // 'pi_ratepay_vorkasse'
+    public static $_RATEPAY_PAYMENT_METHOD_NAMES = [
         'invoice' => "rechnung",
         'installment' => "rate",
         'installment0' => "rate0",
         'elv' => "elv"
-    ); // 'prepayment' => "vorkasse"
+    ]; // 'prepayment' => "vorkasse"
 
     public static $_RATEPAY_PRIVACY_NOTICE_URL_DACH = 'https://www.ratepay.com/zusaetzliche-geschaeftsbedingungen-und-datenschutzhinweis-dach';
 
@@ -43,7 +47,7 @@ class Utilities
      * Static array of supported countries.
      * @var array
      */
-    public static $_RATEPAY_ALLOWED_COUNTRIES = array('de', 'at', 'ch', 'nl');
+    public static $_RATEPAY_ALLOWED_COUNTRIES = ['de', 'at', 'ch', 'nl'];
 
     public static function getPaymentMethod($paymentType)
     {
@@ -68,9 +72,20 @@ class Utilities
         return $paymentMethod;
     }
 
-    public static function getCountry($countryId)
+    public static function getCountry($sCountryId)
     {
-        return strtolower(DatabaseProvider::getDb()->getOne("SELECT OXISOALPHA2 FROM oxcountry WHERE OXID = '" . $countryId . "'"));
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select('OXISOALPHA2')
+            ->from('oxcountry')
+            ->where('OXID = :oxid')
+            ->setParameter(':oxid', $sCountryId);
+        $sOXISOALPHA2 = $oQueryBuilder->execute();
+        $sOXISOALPHA2 = $sOXISOALPHA2->fetchOne();
+        return strtolower($sOXISOALPHA2);
     }
 
     /**

@@ -3,24 +3,16 @@
 namespace pi\ratepay\Core;
 
 use OxidEsales\Eshop\Core\Base;
-use OxidEsales\EshopCommunity\Core\DatabaseProvider;
 use pi\ratepay\Extend\Application\Model\RatepayOxorder;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 
 /**
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (c) Ratepay GmbH
  *
- * @category  PayIntelligent
- * @package   PayIntelligent_RatePAY
- * @copyright (C) 2011 PayIntelligent GmbH  <http://www.payintelligent.de/>
- * @license	http://www.gnu.org/licenses/  GNU General Public License 3
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 /**
@@ -86,16 +78,26 @@ abstract class RequestAbstract extends Base
      */
     public function getCustomerAddress()
     {
-        $countryCode = DatabaseProvider::getDb()->getOne("SELECT OXISOALPHA2 FROM oxcountry WHERE OXID = '" . $this->getUser()->oxuser__oxcountryid->value . "'");
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select('OXISOALPHA2')
+            ->from('oxcountry')
+            ->where('OXID = :oxid')
+            ->setParameter(':oxid', $this->getUser()->oxuser__oxcountryid->value);
+        $sCountryCode = $oQueryBuilder->execute();
+        $sCountryCode = $sCountryCode->fetchOne();
 
-        $address = array(
+        $address = [
             'street'            => $this->getUser()->oxuser__oxstreet->value,
             'street-additional' => $this->getUser()->oxuser__oxaddinfo->value,
             'street-number'     => $this->getUser()->oxuser__oxstreetnr->value,
             'zip-code'      => $this->getUser()->oxuser__oxzip->value,
             'city'          => $this->getUser()->oxuser__oxcity->value,
-            'country-code'  => $countryCode
-        );
+            'country-code'  => $sCountryCode
+        ];
 
         return $address;
     }
@@ -113,9 +115,19 @@ abstract class RequestAbstract extends Base
             return false;
         }
 
-        $countryCode = DatabaseProvider::getDb()->getOne("SELECT OXISOALPHA2 FROM oxcountry WHERE OXID = '" . $deliveryAddress->oxaddress__oxcountryid->value . "'");
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select('OXISOALPHA2')
+            ->from('oxcountry')
+            ->where('OXID = :oxid')
+            ->setParameter(':oxid', $deliveryAddress->oxaddress__oxcountryid->value);
+        $sCountryCode = $oQueryBuilder->execute();
+        $sCountryCode = $sCountryCode->fetchOne();
 
-        $address = array(
+        $address = [
             'first-name'    => $deliveryAddress->oxaddress__oxfname->value,
             'last-name'     => $deliveryAddress->oxaddress__oxlname->value,
             'company'       => $deliveryAddress->oxaddress__oxcompany->value,
@@ -123,8 +135,8 @@ abstract class RequestAbstract extends Base
             'street-number' => $deliveryAddress->oxaddress__oxstreetnr->value,
             'zip-code'      => $deliveryAddress->oxaddress__oxzip->value,
             'city'          => $deliveryAddress->oxaddress__oxcity->value,
-            'country-code'  => $countryCode
-        );
+            'country-code'  => $sCountryCode
+        ];
 
         return $address;
     }
@@ -177,7 +189,18 @@ abstract class RequestAbstract extends Base
      */
     public function getCustomerNationality()
     {
-        return DatabaseProvider::getDb()->getOne("SELECT OXISOALPHA2 FROM oxcountry WHERE OXID = '" . $this->getUser()->oxuser__oxcountryid->value . "'");
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select('OXISOALPHA2')
+            ->from('oxcountry')
+            ->where('OXID = :oxid')
+            ->setParameter(':oxid', $this->getUser()->oxuser__oxcountryid->value);
+        $sCountryCode = $oQueryBuilder->execute();
+        $sCountryCode = $sCountryCode->fetchOne();
+        return $sCountryCode;
     }
 
     /**
@@ -212,7 +235,7 @@ abstract class RequestAbstract extends Base
      */
     public function getCustomerBankdata($paymentType)
     {
-        $bankData          = array();
+        $bankData          = [];
         $bankDataType      = Registry::getSession()->getVariable($paymentType . '_bank_datatype');
         $bankAccountNumber = Registry::getSession()->getVariable($paymentType . '_bank_account_number');
         $bankCode          = Registry::getSession()->getVariable($paymentType . '_bank_code');
@@ -250,7 +273,7 @@ abstract class RequestAbstract extends Base
         return $gender;
     }
 
-    protected function _getOwner($paymentType)
+    protected function getOwner($paymentType)
     {
         $elvUseCompany = Registry::getSession()->getVariable('elv_use_company_name');
 

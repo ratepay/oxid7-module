@@ -5,23 +5,16 @@ namespace pi\ratepay\Application\Model;
 use OxidEsales\Eshop\Core\Field;
 use OxidEsales\Eshop\Core\Model\BaseModel;
 use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
 use pi\ratepay\Core\Utilities;
 
 /**
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (c) Ratepay GmbH
  *
- * @category  PayIntelligent
- * @package   PayIntelligent_RatePAY
- * @copyright (C) 2011 PayIntelligent GmbH  <http://www.payintelligent.de/>
- * @license	http://www.gnu.org/licenses/  GNU General Public License 3
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 /**
@@ -79,18 +72,17 @@ class Settings extends BaseModel
     public function loadByType($type, $shopId, $country = null)
     {
         if ($country !== null) {
-            $this->_setCountry($country);
+            $this->setCountry($country);
         }
 
         //getting at least one field before lazy loading the object
         $this->addField('oxid', 0);
-        $whereClause = array(
+        $whereClause = [
             $this->getViewName() . ".shopid" => $shopId,
             $this->getViewName() . ".type" => strtolower($type),
             $this->getViewName() . ".country" => $this->getCountry()
-        );
+        ];
         $selectQuery = $this->buildSelectString($whereClause);
-
         $this->_isLoaded = $this->assignRecord($selectQuery);
 
         return $this->_isLoaded;
@@ -105,6 +97,9 @@ class Settings extends BaseModel
      */
     public function piUpdateSettings($aActiveCombination, $aResult)
     {
+        $moduleSettingService = ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(ModuleSettingServiceInterface::class);
         $oConfig = Registry::getConfig();
         $sShopId = $oConfig->getShopId();
         if ($sShopId == 'oxbaseshop') {
@@ -114,10 +109,11 @@ class Settings extends BaseModel
         $sRequestMethod = $aActiveCombination['requestmethod'];
         $sMethod = $aActiveCombination['method'];
         $aConfigParams = $aActiveCombination['configparams'];
-        $blActive = $oConfig->getConfigParam($aConfigParams['active']);
-        $sProfileId = $oConfig->getConfigParam($aConfigParams['profileid']);
-        $sSecurityCode = $oConfig->getConfigParam($aConfigParams['secret']);
-        $blSandbox = $oConfig->getConfigParam($aConfigParams['sandbox']);
+
+        $blActive = $moduleSettingService->getBoolean($aConfigParams['active'], 'ratepay');
+        $sProfileId = $moduleSettingService->getString($aConfigParams['profileid'], 'ratepay');
+        $sSecurityCode = $moduleSettingService->getString($aConfigParams['secret'], 'ratepay');
+        $blSandbox = $moduleSettingService->getBoolean($aConfigParams['sandbox'], 'ratepay');
         $sUrl = ($sCountry == 'nl') ?
             Utilities::$_RATEPAY_PRIVACY_NOTICE_URL_NL :
             Utilities::$_RATEPAY_PRIVACY_NOTICE_URL_DACH;
@@ -134,15 +130,15 @@ class Settings extends BaseModel
         $this->pi_ratepay_settings__type = oxNew(Field::class, $sRequestMethod);
 
         $aMerchantConfig = $aResult['merchantConfig'];
-        $this->_piUpdateMerchantConfig($aMerchantConfig, $sRequestMethod);
+        $this->piUpdateMerchantConfig($aMerchantConfig, $sRequestMethod);
 
         $blAddInstallmentData = (($sMethod == 'rate' || $sMethod == 'rate0') && $blActive);
         if ($blAddInstallmentData) {
             $aInstallmentConfig = $aResult['installmentConfig'];
-            $this->_piUpdateInstallmentConfig($aInstallmentConfig);
+            $this->piUpdateInstallmentConfig($aInstallmentConfig);
         }
 
-        $this->_piUpdateElv($sMethod, $sCountry);
+        $this->piUpdateElv($sMethod, $sCountry);
 
         $this->save();
     }
@@ -154,7 +150,7 @@ class Settings extends BaseModel
      * @param $sCountry
      * @return void
      */
-    protected function _piUpdateElv($sMethod, $sCountry)
+    protected function piUpdateElv($sMethod, $sCountry)
     {
         $iIbanOnly = 1;
 
@@ -178,7 +174,7 @@ class Settings extends BaseModel
      * @param string $parameter
      * @return int 0 for false and 1 for true
      */
-    protected function _isParameterCheckedYes($parameter)
+    protected function isParameterCheckedYes($parameter)
     {
         $checked = 0;
         if ($parameter != null && $parameter == 'yes') {
@@ -194,7 +190,7 @@ class Settings extends BaseModel
      * @param $sRequestMethod
      * @return void
      */
-    protected function _piUpdateMerchantConfig($aMerchantConfig, $sRequestMethod)
+    protected function piUpdateMerchantConfig($aMerchantConfig, $sRequestMethod)
     {
         // OX-28 : turn back method from 0% to normal, as data come from RP undistinctly named
         if ($sRequestMethod == 'installment0') {
@@ -204,9 +200,9 @@ class Settings extends BaseModel
         $this->pi_ratepay_settings__limit_min = oxNew(Field::class, $aMerchantConfig['tx-limit-'.$sRequestMethod.'-min']);
         $this->pi_ratepay_settings__limit_max = oxNew(Field::class, $aMerchantConfig['tx-limit-'.$sRequestMethod.'-max']);
         $this->pi_ratepay_settings__limit_max_b2b = oxNew(Field::class, $aMerchantConfig['tx-limit-'.$sRequestMethod.'-max-b2b']);
-        $this->pi_ratepay_settings__b2b = oxNew(Field::class, $this->_isParameterCheckedYes($aMerchantConfig['b2b-'.$sRequestMethod]));
-        $this->pi_ratepay_settings__ala = oxNew(Field::class, $this->_isParameterCheckedYes($aMerchantConfig['delivery-address-'.$sRequestMethod]));
-        $this->pi_ratepay_settings__dfp = oxNew(Field::class, $this->_isParameterCheckedYes($aMerchantConfig['eligibility-device-fingerprint']));
+        $this->pi_ratepay_settings__b2b = oxNew(Field::class, $this->isParameterCheckedYes($aMerchantConfig['b2b-'.$sRequestMethod]));
+        $this->pi_ratepay_settings__ala = oxNew(Field::class, $this->isParameterCheckedYes($aMerchantConfig['delivery-address-'.$sRequestMethod]));
+        $this->pi_ratepay_settings__dfp = oxNew(Field::class, $this->isParameterCheckedYes($aMerchantConfig['eligibility-device-fingerprint']));
         $this->pi_ratepay_settings__currencies = oxNew(Field::class, $aMerchantConfig['currency']);
         $this->pi_ratepay_settings__delivery_countries = oxNew(Field::class, $aMerchantConfig['country-code-delivery']);
 
@@ -221,7 +217,7 @@ class Settings extends BaseModel
      * @param $aInstallmentConfig
      * @return void
      */
-    protected function _piUpdateInstallmentConfig($aInstallmentConfig)
+    protected function piUpdateInstallmentConfig($aInstallmentConfig)
     {
         $this->pi_ratepay_settings__month_allowed = oxNew(Field::class, "[" .$aInstallmentConfig['month-allowed']."]");
         $this->pi_ratepay_settings__min_rate = oxNew(Field::class, $aInstallmentConfig['rate-min-normal']);
@@ -238,7 +234,7 @@ class Settings extends BaseModel
         return $this->_country;
     }
 
-    private function _setCountry($country)
+    private function setCountry($country)
     {
         $this->_country = $country;
     }
@@ -252,20 +248,21 @@ class Settings extends BaseModel
     {
         $sPaymentId = $this->getId();
         if (empty($sPaymentId)) {
-            return array('debit', 'banktransfer', 'both'); // Settings not set yet
+            return ['debit', 'banktransfer', 'both']; // Settings not set yet
         }
 
         if ($this->pi_ratepay_settings__payment_firstday->value == '2,28') {
-            return array('debit', 'banktransfer', 'both');
+            return ['debit', 'banktransfer', 'both'];
         } elseif ($this->pi_ratepay_settings__payment_firstday->value == '28') {
-            return array('banktransfer');
+            return ['banktransfer'];
         }
-        return array('debit');
+        return ['debit'];
     }
 
     public function getSettlementType()
     {
-        if (($this->pi_ratepay_settings__type->value != 'installment' && $this->pi_ratepay_settings__type->value != 'installment0') || !in_array($this->pi_ratepay_settings__country->value, array('DE', 'AT'))) {
+        if (($this->pi_ratepay_settings__type->value != 'installment' && $this->pi_ratepay_settings__type->value != 'installment0') || !in_array($this->pi_ratepay_settings__country->value, ['DE', 'AT']
+            )) {
             return false;
         }
 
@@ -275,5 +272,17 @@ class Settings extends BaseModel
             return 'banktransfer';
         }
         return 'debit';
+    }
+
+    /**
+     * Returns true in case the item represented by this object is derived from parent shop
+     *
+     * @return bool|false
+     */
+    public function blIsDerived(){
+        if ($this->isDerived() == null) {
+            return false;
+        }
+        return $this->isDerived();
     }
 }

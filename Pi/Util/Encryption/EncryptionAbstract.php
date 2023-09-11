@@ -2,10 +2,17 @@
 
 namespace pi\ratepay\Pi\Util\Encryption;
 
+/**
+ *
+ * Copyright (c) Ratepay GmbH
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 /*
  * creates private key
  */
-
 abstract class EncryptionAbstract
 {
     /**
@@ -24,96 +31,127 @@ abstract class EncryptionAbstract
         $this->_privateKey = $this->_privateKeyService->getPrivateKey();
     }
 
-    public function loadBankdata($userId)
+    public function loadBankdata($sUserId)
     {
-        $selectSql = $this->_createBankdataSelectSql($userId);
-        $bankdata = $this->_selectBankdataFromDatabase($selectSql);
+        $aSelectSql = $this->createBankdataSelectSql($sUserId);
+        $aBankdata = $this->selectBankdataFromDatabase($aSelectSql);
 
-        return $bankdata;
+        return $aBankdata;
     }
 
-    public function saveBankdata($userId, array $bankdata)
+    public function saveBankdata($sUserId, array $aBankdata)
     {
-        if ($this->isBankdataSetForUser($userId)) {
-            $saveSql = $this->_createBankdataUpdateSql($userId, $bankdata);
+        if ($this->isBankdataSetForUser($sUserId)) {
+            $aSaveSql = $this->createBankdataUpdateSql($sUserId, $aBankdata);
         } else {
-            $saveSql = $this->_createBankdataInsertSql($userId, $bankdata);
+            $aSaveSql = $this->createBankdataInsertSql($sUserId, $aBankdata);
         }
-        $this->_insertBankdataToDatabase($saveSql);
+        $this->insertBankdataToDatabase($aSaveSql);
     }
 
-    private function _createBankdataInsertSql($userId, array $bankdata)
+    private function createBankdataInsertSql($sUserId, array $aBankdata)
     {
-        $insertSql = 'INSERT INTO ' . $this->_tableName . ' (userid, ';
+        $aValues = [
+            'userid' => ':userid'
+        ];
+        $sKey = $this->_privateKey;
+
+        foreach($aBankdata as $columnName => $columnValue) {
+            $aValues[$columnName] = "AES_ENCRYPT('" . $this->convertBinaryToHex($columnValue) . "', '" . $sKey . "')";
+        }
+
+        $aInsertSql['insert'] = [
+            'table' => $this->_tableName,
+            'values' => $aValues,
+            'setParameter' => [
+                'name' => ':userid',
+                'value' => $sUserId
+            ]
+        ];
+
+        return $aInsertSql;
+    }
+
+    private function createBankdataUpdateSql($sUserId, array $aBankdata)
+    {
+        $sKey = $this->_privateKey;
+        $aSet = [];
+
+        foreach($aBankdata as $columnName => $columnValue) {
+            $aTmpArr = [
+                'key' => $columnName,
+                'value' => "AES_ENCRYPT('" . $this->convertBinaryToHex($columnValue) . "', '" . $sKey . "')",
+            ];
+            array_push($aSet, $aTmpArr);
+        }
+
+        $aUpdateSql['update'] = [
+            'table' => $this->_tableName,
+            'set' => $aSet,
+            'where' => 'userid = :userid',
+            'setParameter' => [
+                'name' => ':userid',
+                'value' => $sUserId
+            ]
+        ];
+
+        return $aUpdateSql;
+    }
+
+    public function isBankdataSetForUser($sUserId)
+    {
+        $aUserSql['select'] = [
+            'var' => 'userid',
+            'from' => $this->_tableName,
+            'where' => 'userid = :userid',
+            'setParameter' => [
+                'name' => ':userid',
+                'value' => $sUserId
+            ]
+        ];
+        $sUserIdStoredInDb = $this->selectUserIdFromDatabase($aUserSql);
+
+        return $sUserId === $sUserIdStoredInDb;
+    }
+
+    private function createBankdataSelectSql($sUserId)
+    {
         $key = $this->_privateKey;
-        $arr = array_keys($bankdata);
-        $lastArrayKey = array_pop($arr);
+        $aSelectSql['select'] = [
+            'var' => [
+                0 => 'userid',
+                1 => "AES_DECRYPT(owner, '$key') as decrypt_owner",
+                2 => "AES_DECRYPT(accountnumber, '$key') as decrypt_accountnumber",
+                3 => "AES_DECRYPT(bankcode, '$key') as decrypt_bankcode"
+            ],
+            'from' => $this->_tableName,
+            'where' => 'userid = :userid',
+            'setParameter' => [
+                'name' => ':userid',
+                'value' => $sUserId
+            ]
+        ];
 
-        foreach($bankdata as $columnName => $columnValue) {
-            $insertSql .= $columnName;
-            $insertSql .= $lastArrayKey != $columnName? ', ' : ')';
-        }
-
-        $insertSql .= ' Values (' . "'" . $userId . "', ";
-
-        foreach($bankdata as $columnName => $columnValue) {
-            $insertSql .= "AES_ENCRYPT('" . $this->_convertBinaryToHex($columnValue) . "', '" . $key . "')";
-            $insertSql .= $lastArrayKey != $columnName? ', ' : ')';
-        }
-
-        return $insertSql;
-    }
-
-    private function _createBankdataUpdateSql($userId, array $bankdata)
-    {
-        $updateSql = 'UPDATE ' . $this->_tableName . ' SET ';
-        $key = $this->_privateKey;
-        $arr = array_keys($bankdata);
-        $lastArrayKey = array_pop($arr);
-        
-        foreach($bankdata as $columnName => $columnValue) {
-            $updateSql .= $columnName . " = AES_ENCRYPT('" . $this->_convertBinaryToHex($columnValue) . "', '" . $key . "')";
-            $updateSql .= $lastArrayKey != $columnName? ', ' : ' ';
-        }
-
-        $updateSql .= ' where userid = ' . "'" . $userId . "'";
-
-        return $updateSql;
-    }
-
-    public function isBankdataSetForUser($userId)
-    {
-        $sanitizedString = $userId;
-        $userSql = "Select userid from " . $this->_tableName . " where userid = '$sanitizedString'";
-        $userIdStoredInDb = $this->_selectUserIdFromDatabase($userSql);
-
-        return $userId === $userIdStoredInDb;
-    }
-
-    private function _createBankdataSelectSql($userId)
-    {
-        $key = $this->_privateKey;
-        $selectSql = "SELECT userid, AES_DECRYPT(owner, '$key') as decrypt_owner, AES_DECRYPT(accountnumber, '$key') as decrypt_accountnumber, AES_DECRYPT(bankcode, '$key') as decrypt_bankcode from " . $this->_tableName . " where userid = '$userId'";
-        return $selectSql;
+        return $aSelectSql;
     }
     
-    protected function _convertBinaryToHex($value)
+    protected function convertBinaryToHex($value)
     {
         $toHex = bin2hex($value);
         
         return $toHex;
     }
     
-    protected function _convertHexToBinary($value)
+    protected function convertHexToBinary($value)
     {
         $toBinary = pack("H*", $value);
         
         return $toBinary;
     }
 
-    abstract protected function _insertBankdataToDatabase($insertSql);
+    abstract protected function insertBankdataToDatabase($insertSql);
 
-    abstract protected function _selectBankdataFromDatabase($selectSql);
+    abstract protected function selectBankdataFromDatabase($aSelectSql);
 
-    abstract protected function _selectUserIdFromDatabase($userSql);
+    abstract protected function selectUserIdFromDatabase($userSql);
 }

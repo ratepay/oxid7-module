@@ -5,31 +5,23 @@ namespace pi\ratepay\Core;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\Base;
 use OxidEsales\Eshop\Core\Exception\ConnectionException;
-use OxidEsales\Eshop\Core\Exception\DatabaseConnectionException;
 use OxidEsales\Eshop\Core\Price;
 use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
 use OxidEsales\Facts\Facts;
 use OxidEsales\Eshop\Core\ShopVersion;
-use OxidEsales\EshopCommunity\Core\DatabaseProvider;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 use pi\ratepay\Application\Model\Settings;
 use RatePAY\ModelBuilder;
 use RatePAY\RequestBuilder;
 
 /**
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (c) Ratepay GmbH
  *
- * @category      PayIntelligent
- * @package       PayIntelligent_RatePAY
- * @copyright (C) 2011 PayIntelligent GmbH  <http://www.payintelligent.de/>
- * @license       http://www.gnu.org/licenses/  GNU General Public License 3
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 class ModelFactory extends Base
 {
@@ -39,138 +31,138 @@ class ModelFactory extends Base
      *
      * @var array
      */
-    protected static $_aCountry2Payment2Configs = array(
-        'de' => array(
-            'rechnung' => array(
+    protected static $_aCountry2Payment2Configs = [
+        'de' => [
+            'rechnung' => [
                 'active' => 'blRPInvoiceActive',
                 'sandbox' => 'blRPInvoiceSandbox',
                 'profileid' => 'sRPInvoiceProfileId',
                 'secret' => 'sRPInvoiceSecret',
-            ),
-            'rate' => array(
+            ],
+            'rate' => [
                 'active' => 'blRPInstallmentActive',
                 'sandbox' => 'blRPInstallmentSandbox',
                 'profileid' => 'sRPInstallmentProfileId',
                 'secret' => 'sRPInstallmentSecret',
                 'settlement' => 'sRPInstallmentSettlement',
-            ),
-            'rate0' => array(
+            ],
+            'rate0' => [
                 'active' => 'blRPInstallment0Active',
                 'sandbox' => 'blRPInstallment0Sandbox',
                 'profileid' => 'sRPInstallment0ProfileId',
                 'secret' => 'sRPInstallment0Secret',
                 'settlement' => 'sRPInstallment0Settlement',
-            ),
-            'elv' => array(
+            ],
+            'elv' => [
                 'active' => 'blRPElvActive',
                 'sandbox' => 'blRPElvSandbox',
                 'profileid' => 'sRPElvProfileId',
                 'secret' => 'sRPElvSecret',
-            ),
-            'invoice' => array(
+            ],
+            'invoice' => [
                 'active' => 'blRPInvoiceActive',
                 'sandbox' => 'blRPInvoiceSandbox',
                 'profileid' => 'sRPInvoiceProfileId',
                 'secret' => 'sRPInvoiceSecret',
-            ),
-            'installment' => array(
+            ],
+            'installment' => [
                 'active' => 'blRPInstallmentActive',
                 'sandbox' => 'blRPInstallmentSandbox',
                 'profileid' => 'sRPInstallmentProfileId',
                 'secret' => 'sRPInstallmentSecret',
                 'settlement' => 'sRPInstallmentSettlement',
-            ),
-            'installment0' => array(
+            ],
+            'installment0' => [
                 'active' => 'blRPInstallment0Active',
                 'sandbox' => 'blRPInstallment0Sandbox',
                 'profileid' => 'sRPInstallment0ProfileId',
                 'secret' => 'sRPInstallment0Secret',
                 'settlement' => 'sRPInstallment0Settlement',
-            ),
-        ),
-        'at' => array(
-            'rechnung' => array(
+            ],
+        ],
+        'at' => [
+            'rechnung' => [
                 'active' => 'blRPAustriaInvoice',
                 'sandbox' => 'blRPAustriaInvoiceSandbox',
                 'profileid' => 'sRPAustriaInvoiceProfileId',
                 'secret' => 'sRPAustriaInvoiceSecret',
-            ),
-            'rate' => array(
+            ],
+            'rate' => [
                 'active' => 'blRPAustriaInstallment',
                 'sandbox' => 'blRPAustriaInstallmentSandbox',
                 'profileid' => 'sRPAustriaInstallmentProfileId',
                 'secret' => 'sRPAustriaInstallmentSecret',
                 'settlement' => 'sRPAustriaInstallmentSettlement',
-            ),
-            'rate0' => array(
+            ],
+            'rate0' => [
                 'active' => 'blRPAustriaInstallment0',
                 'sandbox' => 'blRPAustriaInstallment0Sandbox',
                 'profileid' => 'sRPAustriaInstallment0ProfileId',
                 'secret' => 'sRPAustriaInstallment0Secret',
                 'settlement' => 'sRPAustriaInstallment0Settlement',
-            ),
-            'elv' => array(
+            ],
+            'elv' => [
                 'active' => 'blRPAustriaElv',
                 'sandbox' => 'blRPAustriaElvSandbox',
                 'profileid' => 'sRPAustriaElvProfileId',
                 'secret' => 'sRPAustriaElvSecret',
-            ),
-            'invoice' => array(
+            ],
+            'invoice' => [
                 'active' => 'blRPAustriaInvoice',
                 'sandbox' => 'blRPAustriaInvoiceSandbox',
                 'profileid' => 'sRPAustriaInvoiceProfileId',
                 'secret' => 'sRPAustriaInvoiceSecret',
-            ),
-            'installment' => array(
+            ],
+            'installment' => [
                 'active' => 'blRPAustriaInstallment',
                 'sandbox' => 'blRPAustriaInstallmentSandbox',
                 'profileid' => 'sRPAustriaInstallmentProfileId',
                 'secret' => 'sRPAustriaInstallmentSecret',
                 'settlement' => 'sRPAustriaInstallmentSettlement',
-            ),
-            'installment0' => array(
+            ],
+            'installment0' => [
                 'active' => 'blRPAustriaInstallment0',
                 'sandbox' => 'blRPAustriaInstallment0Sandbox',
                 'profileid' => 'sRPAustriaInstallment0ProfileId',
                 'secret' => 'sRPAustriaInstallment0Secret',
                 'settlement' => 'sRPAustriaInstallment0Settlement',
-            ),
-        ),
-        'ch' => array(
-            'rechnung' => array(
+            ],
+        ],
+        'ch' => [
+            'rechnung' => [
                 'active' => 'blRPSwitzerlandInvoice',
                 'sandbox' => 'blRPSwitzerlandInvoiceSandbox',
                 'profileid' => 'sRPSwitzerlandInvoiceProfileId',
                 'secret' => 'sRPSwitzerlandInvoiceSecret',
-            ),
-            'invoice' => array(
+            ],
+            'invoice' => [
                 'active' => 'blRPSwitzerlandInvoice',
                 'sandbox' => 'blRPSwitzerlandInvoiceSandbox',
                 'profileid' => 'sRPSwitzerlandInvoiceProfileId',
                 'secret' => 'sRPSwitzerlandInvoiceSecret',
-            ),
-        ),
-        'nl' => array(
-            'rechnung' => array(
+            ],
+        ],
+        'nl' => [
+            'rechnung' => [
                 'active' => 'blRPNetherlandInvoice',
                 'sandbox' => 'blRPNetherlandInvoiceSandbox',
                 'profileid' => 'sRPNetherlandInvoiceProfileId',
                 'secret' => 'sRPNetherlandInvoiceSecret',
-            ),
-            'elv' => array(
+            ],
+            'elv' => [
                 'active' => 'blRPAustriaElv',
                 'sandbox' => 'blRPNetherlandElvSandbox',
                 'profileid' => 'sRPNetherlandElvProfileId',
                 'secret' => 'sRPNetherlandElvSecret',
-            ),
-            'invoice' => array(
+            ],
+            'invoice' => [
                 'active' => 'blRPNetherlandInvoice',
                 'sandbox' => 'blRPNetherlandInvoiceSandbox',
                 'profileid' => 'sRPNetherlandInvoiceProfileId',
                 'secret' => 'sRPNetherlandInvoiceSecret',
-            ),
-        ),
-    );
+            ],
+        ],
+    ];
 
 
     protected $_orderId;
@@ -201,7 +193,7 @@ class ModelFactory extends Base
 
     protected $_countryId;
 
-    protected $_calculationData = array();
+    protected $_calculationData = [];
 
     protected $_orderNumber;
 
@@ -358,25 +350,25 @@ class ModelFactory extends Base
     {
         switch ($operation) {
             case 'PAYMENT_INIT':
-                return $this->_makePaymentInit();
+                return $this->makePaymentInit();
                 break;
             case 'PAYMENT_REQUEST':
-                return $this->_makePaymentRequest();
+                return $this->makePaymentRequest();
                 break;
             case 'PAYMENT_CONFIRM':
-                return $this->_makePaymentConfirm();
+                return $this->makePaymentConfirm();
                 break;
             case 'CONFIRMATION_DELIVER':
-                return $this->_makeConfirmationDeliver();
+                return $this->makeConfirmationDeliver();
                 break;
             case 'PAYMENT_CHANGE':
-                return $this->_makePaymentChange();
+                return $this->makePaymentChange();
                 break;
             case 'PROFILE_REQUEST':
-                return $this->_makeProfileRequest();
+                return $this->makeProfileRequest();
                 break;
             case 'CALCULATION_REQUEST':
-                return $this->_makeCalculationRequest();
+                return $this->makeCalculationRequest();
                 break;
         }
     }
@@ -386,11 +378,13 @@ class ModelFactory extends Base
      *
      * @return int
      */
-    private function _getConfirmSettings()
+    private function getConfirmSettings()
     {
-        $oConfig = Registry::getConfig();
+        $moduleSettingService = ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(ModuleSettingServiceInterface::class);
         $iRPAutoPaymentConfirm =
-            (int)$oConfig->getConfigParam('blRPAutoPaymentConfirm');
+            (int)$moduleSettingService->getBoolean('blRPAutoPaymentConfirm', 'ratepay');
 
         return $iRPAutoPaymentConfirm;
     }
@@ -400,21 +394,30 @@ class ModelFactory extends Base
      *
      * @return bool
      */
-    private function _makePaymentConfirm()
+    private function makePaymentConfirm()
     {
         $util = oxNew(Utilities::class);
         $paymentMethod = $util->getPaymentMethod($this->_paymentType);
 
-        $confirm = $this->_getConfirmSettings();
+        $confirm = $this->getConfirmSettings();
         if ($confirm == 0) {
             return true;
         }
 
-        $mbHead = $this->_getHead();
+        $mbHead = $this->getHead();
         $rb = oxNew(RequestBuilder::class, $this->_sandbox);
 
         $paymentConfirm = $rb->callPaymentConfirm($mbHead);
-        LogsService::getInstance()->logRatepayTransaction($this->getOrderNumber(), $this->_transactionId, $this->_paymentType, 'PAYMENT_CONFIRM', $this->_subtype, '', '', $paymentConfirm);
+        LogsService::getInstance()->logRatepayTransaction(
+            $this->getOrderNumber(),
+            $this->_transactionId,
+            $this->_paymentType,
+            'PAYMENT_CONFIRM',
+            $this->_subtype,
+            '',
+            '',
+            $paymentConfirm
+        );
 
         if ($paymentConfirm->isSuccessful()) {
             return true;
@@ -427,9 +430,9 @@ class ModelFactory extends Base
      *
      * @return object
      */
-    private function _makeCalculationRequest()
+    private function makeCalculationRequest()
     {
-        $mbHead = $this->_getHead();
+        $mbHead = $this->getHead();
 
         $array['InstallmentCalculation']['Amount'] = $this->_calculationData['requestAmount'];
         if ($this->_calculationData['requestSubtype'] == 'calculation-by-rate') {
@@ -438,12 +441,12 @@ class ModelFactory extends Base
             $array['InstallmentCalculation']['CalculationTime']['Month'] = $this->_calculationData['requestValue'];
         }
         $array['InstallmentCalculation']['PaymentFirstday'] = $this->_calculationData['paymentFirstday'];
-
         $mbContentTime = oxNew(ModelBuilder::class, 'Content');
         $mbContentTime->setArray($array);
-
         $rb = oxNew(RequestBuilder::class, $this->_sandbox);
-        $calculationRequest = $rb->callCalculationRequest($mbHead, $mbContentTime)->subtype($this->_calculationData['requestSubtype']);
+        $calculationRequest = $rb->callCalculationRequest($mbHead, $mbContentTime)->subtype(
+            $this->_calculationData['requestSubtype']
+        );
         return $calculationRequest;
     }
 
@@ -452,20 +455,20 @@ class ModelFactory extends Base
      *
      * @return object
      */
-    private function _makeConfirmationDeliver()
+    private function makeConfirmationDeliver()
     {
         $mbContent = oxNew(ModelBuilder::class, 'Content');
 
-        $this->_getOrderCountryId();
-        $mbHead = $this->_getHead();
+        $this->getOrderCountryId();
+        $mbHead = $this->getHead();
 
         $shoppingBasket = [
-            'ShoppingBasket' => $this->_getSpecialBasket(),
+            'ShoppingBasket' => $this->getSpecialBasket(),
         ];
         $mbContent->setArray($shoppingBasket);
 
         // OX-31 Add invoice number if existing
-        $orderBillNr = $this->_getOrderBillNr();
+        $orderBillNr = $this->getOrderBillNr();
         if (!empty($orderBillNr)) {
             $invoicing = [
                 'Invoicing' => [
@@ -478,26 +481,54 @@ class ModelFactory extends Base
 
         $rb = oxNew(RequestBuilder::class, $this->_sandbox);
         $confirmationDeliver = $rb->callConfirmationDeliver($mbHead, $mbContent);
-        LogsService::getInstance()->logRatepayTransaction($this->getOrderNumber(), $this->_transactionId, $this->_paymentType, 'CONFIRMATION_DELIVER', $this->_subtype, '', '', $confirmationDeliver);
+        LogsService::getInstance()->logRatepayTransaction(
+            $this->getOrderNumber(),
+            $this->_transactionId,
+            $this->_paymentType,
+            'CONFIRMATION_DELIVER',
+            $this->_subtype,
+            '',
+            '',
+            $confirmationDeliver
+        );
         return $confirmationDeliver;
     }
 
     /**
      * get order country id
      */
-    private function _getOrderCountryId()
+    private function getOrderCountryId()
     {
-        $countryId = DatabaseProvider::getDb()->getOne("SELECT OXBILLCOUNTRYID FROM oxorder WHERE OXID = '" . $this->_orderId . "'");
-        $this->_countryId = $countryId;
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select('OXBILLCOUNTRYID')
+            ->from('oxorder')
+            ->where('OXID = :oxid')
+            ->setParameter(':oxid', $this->_orderId);
+        $sCountryId = $oQueryBuilder->execute();
+        $this->_countryId = $sCountryId->fetchOne();
     }
 
     /**
      * get order
      */
-    protected function _getOrderBillNr()
+    protected function getOrderBillNr()
     {
-        $billNr = DatabaseProvider::getDb()->getOne("SELECT OXBILLNR FROM oxorder WHERE OXID = '" . $this->_orderId . "'");
-        return $billNr;
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select('OXBILLNR')
+            ->from('oxorder')
+            ->where('OXID = :oxid')
+            ->setParameter(':oxid', $this->_orderId);
+        $sBillNr = $oQueryBuilder->execute();
+        $sBillNr = $sBillNr->fetchOne();
+        return $sBillNr;
     }
 
     /**
@@ -506,9 +537,9 @@ class ModelFactory extends Base
      * @param void
      * @return void
      */
-    protected function _piSetCountryIdByUser()
+    protected function piSetCountryIdByUser()
     {
-        if (empty($this->_countryId)) { // might be set already, for example by _getOrderCountryId()
+        if (empty($this->_countryId)) { // might be set already, for example by getOrderCountryId()
             $oUser = $this->getUser();
             $this->_countryId = $oUser->oxuser__oxcountryid->value;
         }
@@ -519,59 +550,71 @@ class ModelFactory extends Base
      *
      * @return object|bool
      */
-    private function _makePaymentChange()
+    private function makePaymentChange()
     {
-        $this->_getOrderCountryId();
-        $mbHead = $this->_getHead();
+        $this->getOrderCountryId();
+        $mbHead = $this->getHead();
         $detailsViewData = oxNew(DetailsViewData::class, $this->_orderId);
 
         $this->basket = $detailsViewData->getPreparedOrderArticles();
 
-        $shoppingBasket = ['ShoppingBasket' => $this->_getSpecialBasket()];
+        $shoppingBasket = ['ShoppingBasket' => $this->getSpecialBasket()];
 
         $mbContent = oxNew(ModelBuilder::class, 'Content');
         $mbContent->setArray($shoppingBasket);
 
         $rb = oxNew(RequestBuilder::class, $this->_sandbox);
         $paymentChange = $rb->callPaymentChange($mbHead, $mbContent)->subtype($this->_subtype);
-        LogsService::getInstance()->logRatepayTransaction($this->getOrderNumber(), $this->_transactionId, $this->_paymentType, 'PAYMENT_CHANGE', $this->_subtype, '', '', $paymentChange);
+        LogsService::getInstance()->logRatepayTransaction(
+            $this->getOrderNumber(),
+            $this->_transactionId,
+            $this->_paymentType,
+            'PAYMENT_CHANGE',
+            $this->_subtype,
+            '',
+            '',
+            $paymentChange
+        );
         return $paymentChange;
     }
 
     /**
      * return the head for an request
      */
-    private function _getHead()
+    private function getHead()
     {
         if ($this->_profileId && $this->_securityCode) {
             $profileId = $this->_profileId;
             $securityCode = $this->_securityCode;
         } else {
-            $this->_piSetCountryIdByUser();
+            $this->piSetCountryIdByUser();
             $util = oxNew(Utilities::class);
             $oConfig = Registry::getConfig();
             $paymentMethod = $util->getPaymentMethod($this->_paymentType);
             $paymentMethod = strtolower($paymentMethod);
-            $country = $this->_getCountryCodeById($this->_countryId);
+            $country = $this->getCountryCodeById($this->_countryId);
             $country = strtolower($country);
 
             $sConfigParamProfileId = self::$_aCountry2Payment2Configs[$country][$paymentMethod]['profileid'];
             $sConfigParamSecurityCode = self::$_aCountry2Payment2Configs[$country][$paymentMethod]['secret'];
             $sConfigParamSandbox = self::$_aCountry2Payment2Configs[$country][$paymentMethod]['sandbox'];
 
-            $profileId = $oConfig->getConfigParam($sConfigParamProfileId);
-            $securityCode = $oConfig->getConfigParam($sConfigParamSecurityCode);
-            $sSandbox = $oConfig->getConfigParam($sConfigParamSandbox);
+            $moduleSettingService = ContainerFactory::getInstance()
+                ->getContainer()
+                ->get(ModuleSettingServiceInterface::class);
+            $sProfileId = $moduleSettingService->getString($sConfigParamProfileId, 'ratepay');
+            $sSecurityCode = $moduleSettingService->getString($sConfigParamSecurityCode, 'ratepay');
+            $bSandbox = $moduleSettingService->getBoolean($sConfigParamSandbox, 'ratepay');
 
-            $this->setSandbox($sSandbox);
+            $this->setSandbox($bSandbox);
         }
         $oModule = oxNew('oxModule');
         $oModule->load('ratepay');
         $headArray = [
             'SystemId' => $_SERVER['SERVER_ADDR'],
             'Credential' => [
-                'ProfileId' => $profileId,
-                'Securitycode' => $securityCode
+                'ProfileId' => $sProfileId,
+                'Securitycode' => $sSecurityCode
             ],
             'Meta' => [
                 'Systems' => [
@@ -590,8 +633,17 @@ class ModelFactory extends Base
 
         $modelBuilder->setArray($headArray);
         if (!empty($this->_orderId)) {
-            $orderNr = DatabaseProvider::getDb()->getOne('SELECT OXORDERNR FROM oxorder where oxid = ?', array($this->_orderId));
-            $external['External']['OrderId'] = $orderNr;
+            $oContainer = ContainerFactory::getInstance()->getContainer();
+            /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+            $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+            $oQueryBuilder = $oQueryBuilderFactory->create();
+            $oQueryBuilder
+                ->select('OXORDERNR')
+                ->from('oxorder')
+                ->where('oxid = :oxid')
+                ->setParameter(':oxid', $this->_orderId);
+            $sOrderNr = $oQueryBuilder->execute();
+            $external['External']['OrderId'] = $sOrderNr->fetchOne();
         }
         if (!empty($this->_customerId)) {
             $external['External']['MerchantConsumerId'] = $this->_customerId;
@@ -614,9 +666,9 @@ class ModelFactory extends Base
      *
      * @return bool
      */
-    private function _makeProfileRequest()
+    private function makeProfileRequest()
     {
-        $head = $this->_getHead();
+        $head = $this->getHead();
 
         $rb = oxNew(RequestBuilder::class, $this->_sandbox);
         $profileRequest = $rb->callProfileRequest($head);
@@ -632,12 +684,21 @@ class ModelFactory extends Base
      *
      * @return object|bool
      */
-    private function _makePaymentInit()
+    private function makePaymentInit()
     {
-        $head = $this->_getHead();
+        $head = $this->getHead();
         $rb = oxNew(RequestBuilder::class, $this->_sandbox);
         $paymentInit = $rb->callPaymentInit($head);
-        LogsService::getInstance()->logRatepayTransaction($this->getOrderNumber(), '', $this->_paymentType, 'PAYMENT_INIT', '', $this->getUser()->oxuser__oxfname->value, $this->getUser()->oxuser__oxlname->value, $paymentInit);
+        LogsService::getInstance()->logRatepayTransaction(
+            $this->getOrderNumber(),
+            '',
+            $this->_paymentType,
+            'PAYMENT_INIT',
+            '',
+            $this->getUser()->oxuser__oxfname->value,
+            $this->getUser()->oxuser__oxlname->value,
+            $paymentInit
+        );
         return $paymentInit;
     }
 
@@ -646,10 +707,10 @@ class ModelFactory extends Base
      *
      * @return mixed
      */
-    private function _makePaymentRequest()
+    private function makePaymentRequest()
     {
-        $head = $this->_getHead();
-        $basket = $this->_getBasket();
+        $head = $this->getHead();
+        $basket = $this->getBasket();
         $util = oxNew(Utilities::class);
 
         $salutation = strtoupper($this->getUser()->oxuser__oxsal->value);
@@ -680,9 +741,10 @@ class ModelFactory extends Base
                 'IpAddress' => "127.0.0.1",
                 'Addresses' => [
                     [
-                        'Address' => $this->_getCustomerAddress()
-                    ], [
-                        'Address' => $this->_getDeliveryAddress()
+                        'Address' => $this->getCustomerAddress()
+                    ],
+                    [
+                        'Address' => $this->getDeliveryAddress()
                     ]
                 ],
                 'Contacts' => [
@@ -705,42 +767,48 @@ class ModelFactory extends Base
         }
 
         if ($util->getPaymentMethod($this->_paymentType) == 'ELV') {
-            $contentArr['Customer']['BankAccount'] = $this->_getCustomerBankdata($this->_paymentType);
+            $contentArr['Customer']['BankAccount'] = $this->getCustomerBankdata($this->_paymentType);
         }
         if ($util->getPaymentMethod($this->_paymentType) == 'INSTALLMENT') {
-            $contentArr['Payment']['InstallmentDetails'] = $this->_getInstallmentData();
+            $contentArr['Payment']['InstallmentDetails'] = $this->getInstallmentData();
             $contentArr['Payment']['DebitPayType'] = 'BANK-TRANSFER';
             $contentArr['Payment']['Amount'] = Registry::getSession()->getVariable('pi_ratepay_rate_total_amount');
 
             $settings = oxNew(Settings::class);
             $iban = Registry::getSession()->getVariable('pi_ratepay_rate_bank_iban');
-            $settings->loadByType($util->getPaymentMethod('pi_ratepay_rate'), Registry::getSession()->getVariable('shopId'));
+            $settings->loadByType(
+                $util->getPaymentMethod('pi_ratepay_rate'),
+                Registry::getSession()->getVariable('shopId')
+            );
             if (!empty($iban) && $iban !== 'undefined') {
-                $contentArr['Customer']['BankAccount'] = $this->_getCustomerBankdata('pi_ratepay_rate');
+                $contentArr['Customer']['BankAccount'] = $this->getCustomerBankdata('pi_ratepay_rate');
                 $contentArr['Payment']['DebitPayType'] = 'DIRECT-DEBIT';
             }
         }
         if ($util->getPaymentMethod($this->_paymentType) == 'INSTALLMENT0') {
-            $contentArr['Payment']['InstallmentDetails'] = $this->_getInstallment0Data();
+            $contentArr['Payment']['InstallmentDetails'] = $this->getInstallment0Data();
             $contentArr['Payment']['DebitPayType'] = 'BANK-TRANSFER';
             $contentArr['Payment']['Amount'] = Registry::getSession()->getVariable('pi_ratepay_rate0_total_amount');
             $contentArr['Payment']['Method'] = 'installment'; // OX-28: For RP, installment0 is still installment
 
             $settings = oxNew(Settings::class);
             $iban = Registry::getSession()->getVariable('pi_ratepay_rate0_bank_iban');
-            $settings->loadByType($util->getPaymentMethod('pi_ratepay_rate0'), Registry::getSession()->getVariable('shopId'));
+            $settings->loadByType(
+                $util->getPaymentMethod('pi_ratepay_rate0'),
+                Registry::getSession()->getVariable('shopId')
+            );
             if (!empty($iban) && $iban !== 'undefined') {
-                $contentArr['Customer']['BankAccount'] = $this->_getCustomerBankdata('pi_ratepay_rate0');
+                $contentArr['Customer']['BankAccount'] = $this->getCustomerBankdata('pi_ratepay_rate0');
                 $contentArr['Payment']['DebitPayType'] = 'DIRECT-DEBIT';
             }
         }
 
-        $shippingCosts = $this->_getShippingCosts();
+        $shippingCosts = $this->getShippingCosts();
         if (!empty($shippingCosts)) {
             $contentArr['ShoppingBasket']['Shipping'] = $shippingCosts;
         }
 
-        $discount = $this->_getDiscount();
+        $discount = $this->getDiscount();
         if (!empty($discount)) {
             $contentArr['ShoppingBasket']['Discount'] = $discount;
         }
@@ -751,7 +819,16 @@ class ModelFactory extends Base
         $rb = oxNew(RequestBuilder::class, $this->_sandbox);
 
         $paymentRequest = $rb->callPaymentRequest($head, $mbContent);
-        LogsService::getInstance()->logRatepayTransaction($this->getOrderNumber(), $this->_transactionId, $this->_paymentType, 'PAYMENT_REQUEST', '', $this->getUser()->oxuser__oxfname->value, $this->getUser()->oxuser__oxlname->value, $paymentRequest);
+        LogsService::getInstance()->logRatepayTransaction(
+            $this->getOrderNumber(),
+            $this->_transactionId,
+            $this->_paymentType,
+            'PAYMENT_REQUEST',
+            '',
+            $this->getUser()->oxuser__oxfname->value,
+            $this->getUser()->oxuser__oxlname->value,
+            $paymentRequest
+        );
         return $paymentRequest;
     }
 
@@ -760,7 +837,7 @@ class ModelFactory extends Base
      *
      * @return array|bool
      */
-    private function _getShippingCosts()
+    private function getShippingCosts()
     {
         $basket = $this->_basket;
         if (method_exists($basket, 'getDeliveryCost') && $basket->getDeliveryCost()) {
@@ -783,11 +860,11 @@ class ModelFactory extends Base
         if (empty($deliveryCosts)) {
             return false;
         }
-        $shipping = array(
+        $shipping = [
             'Description' => 'Shipping Costs',
             'UnitPriceGross' => $deliveryCosts,
             'TaxRate' => $deliveryVat,
-        );
+        ];
 
         return $shipping;
     }
@@ -797,7 +874,7 @@ class ModelFactory extends Base
      *
      * @return array|bool|int
      */
-    private function _getDiscount()
+    private function getDiscount()
     {
         $discount = 0;
         $basket = $this->_basket;
@@ -817,7 +894,7 @@ class ModelFactory extends Base
         if (count($basket->getVouchers())) {
             foreach ($basket->getVouchers() as $voucher) {
                 $vNr = $voucher->sVoucherId;
-                $sDiscountTitle .= '_' . $this->_getVoucherTitle($vNr);
+                $sDiscountTitle .= '_' . $this->getVoucherTitle($vNr);
                 $discount = $discount + (float)$util->getFormattedNumber($voucher->dVoucherdiscount);
             }
         }
@@ -828,11 +905,11 @@ class ModelFactory extends Base
 
         $sDiscountTitle = trim($sDiscountTitle, '_');
 
-        $discount = array(
+        $discount = [
             'Description' => $sDiscountTitle,
             'UnitPriceGross' => $basket->getTotalDiscountSum(),
             'TaxRate' => $util->getFormattedNumber("0"),
-        );
+        ];
 
         return $discount;
     }
@@ -843,10 +920,29 @@ class ModelFactory extends Base
      * @param $oxid
      * @return false|string
      */
-    private function _getVoucherTitle($oxid)
+    private function getVoucherTitle($oxid)
     {
-        $voucher = DatabaseProvider::getDb()->getOne("SELECT OXVOUCHERSERIEID FROM oxvouchers WHERE OXID ='" . $oxid . "'");
-        return DatabaseProvider::getDb()->getOne("SELECT OXSERIENR FROM oxvoucherseries WHERE OXID ='" . $voucher . "'");
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select('OXVOUCHERSERIEID')
+            ->from('oxvouchers')
+            ->where('OXID = :oxid')
+            ->setParameter(':oxid', $oxid);
+        $sVoucher = $oQueryBuilder->execute();
+        $sVoucher = $sVoucher->fetchOne();
+
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select('OXSERIENR')
+            ->from('oxvoucherseries')
+            ->where('OXID = :oxid')
+            ->setParameter(':oxid', $sVoucher);
+        $sOxVoucherSeries = $oQueryBuilder->execute();
+        $sOxVoucherSeries = $sOxVoucherSeries->fetchOne();
+        return $sOxVoucherSeries;
     }
 
     /**
@@ -854,15 +950,27 @@ class ModelFactory extends Base
      *
      * @return array
      */
-    private function _getInstallmentData()
+    private function getInstallmentData()
     {
         $util = oxNew(Utilities::class);
-        return array(
+        return [
             'InstallmentNumber' => Registry::getSession()->getVariable('pi_ratepay_rate_number_of_rates'),
-            'InstallmentAmount' => $util->getFormattedNumber(Registry::getSession()->getVariable('pi_ratepay_rate_rate'), '2', '.'),
-            'LastInstallmentAmount' => $util->getFormattedNumber(Registry::getSession()->getVariable('pi_ratepay_rate_last_rate'), '2', '.'),
-            'InterestRate' => $util->getFormattedNumber(Registry::getSession()->getVariable('pi_ratepay_rate_interest_rate'), '2', '.')
-        );
+            'InstallmentAmount' => $util->getFormattedNumber(
+                Registry::getSession()->getVariable('pi_ratepay_rate_rate'),
+                '2',
+                '.'
+            ),
+            'LastInstallmentAmount' => $util->getFormattedNumber(
+                Registry::getSession()->getVariable('pi_ratepay_rate_last_rate'),
+                '2',
+                '.'
+            ),
+            'InterestRate' => $util->getFormattedNumber(
+                Registry::getSession()->getVariable('pi_ratepay_rate_interest_rate'),
+                '2',
+                '.'
+            )
+        ];
     }
 
     /**
@@ -870,15 +978,27 @@ class ModelFactory extends Base
      *
      * @return array
      */
-    private function _getInstallment0Data()
+    private function getInstallment0Data()
     {
         $util = oxNew(Utilities::class);
-        return array(
+        return [
             'InstallmentNumber' => Registry::getSession()->getVariable('pi_ratepay_rate0_number_of_rates'),
-            'InstallmentAmount' => $util->getFormattedNumber(Registry::getSession()->getVariable('pi_ratepay_rate0_rate'), '2', '.'),
-            'LastInstallmentAmount' => $util->getFormattedNumber(Registry::getSession()->getVariable('pi_ratepay_rate0_last_rate'), '2', '.'),
-            'InterestRate' => $util->getFormattedNumber(Registry::getSession()->getVariable('pi_ratepay_rate0_interest_rate'), '2', '.')
-        );
+            'InstallmentAmount' => $util->getFormattedNumber(
+                Registry::getSession()->getVariable('pi_ratepay_rate0_rate'),
+                '2',
+                '.'
+            ),
+            'LastInstallmentAmount' => $util->getFormattedNumber(
+                Registry::getSession()->getVariable('pi_ratepay_rate0_last_rate'),
+                '2',
+                '.'
+            ),
+            'InterestRate' => $util->getFormattedNumber(
+                Registry::getSession()->getVariable('pi_ratepay_rate0_interest_rate'),
+                '2',
+                '.'
+            )
+        ];
     }
 
     /**
@@ -888,9 +1008,9 @@ class ModelFactory extends Base
      * @todo validate if bankdata is in session
      * @todo bank data persistence
      */
-    private function _getCustomerBankdata($paymentType)
+    private function getCustomerBankdata($paymentType)
     {
-        $bankData = array();
+        $bankData = [];
         $bankDataType = Registry::getSession()->getVariable($paymentType . '_bank_datatype');
         $bankAccountNumber = Registry::getSession()->getVariable($paymentType . '_bank_account_number');
         $bankCode = Registry::getSession()->getVariable($paymentType . '_bank_code');
@@ -911,7 +1031,8 @@ class ModelFactory extends Base
             if (!empty($elvUseCompany) && $elvUseCompany == 1) {
                 $bankData['Owner'] = $this->getUser()->oxuser__oxcompany->value;
             } else {
-                $bankData['Owner'] = $this->getUser()->oxuser__oxfname->value . ' ' . $this->getUser()->oxuser__oxlname->value;
+                $bankData['Owner'] = $this->getUser()->oxuser__oxfname->value . ' ' . $this->getUser(
+                    )->oxuser__oxlname->value;
             }
         }
 
@@ -923,18 +1044,28 @@ class ModelFactory extends Base
      *
      * @return array
      */
-    private function _getCustomerAddress()
+    private function getCustomerAddress()
     {
-        $countryCode = DatabaseProvider::getDb()->getOne("SELECT OXISOALPHA2 FROM oxcountry WHERE OXID = '" . $this->getUser()->oxuser__oxcountryid->value . "'");
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select('OXISOALPHA2')
+            ->from('oxcountry')
+            ->where('OXID = :oxid')
+            ->setParameter(':oxid', $this->getUser()->oxuser__oxcountryid->value);
+        $sCountryCode = $oQueryBuilder->execute();
+        $sCountryCode = $sCountryCode->fetchOne();
 
-        $address = array(
+        $address = [
             'Type' => 'billing',
             'Street' => $this->getUser()->oxuser__oxstreet->value,
             'StreetNumber' => $this->getUser()->oxuser__oxstreetnr->value,
             'ZipCode' => $this->getUser()->oxuser__oxzip->value,
             'City' => $this->getUser()->oxuser__oxcity->value,
-            'CountryCode' => $countryCode
-        );
+            'CountryCode' => $sCountryCode
+        ];
 
         return $address;
     }
@@ -944,22 +1075,32 @@ class ModelFactory extends Base
      *
      * @return array
      */
-    private function _getDeliveryAddress()
+    private function getDeliveryAddress()
     {
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
         $order = oxNew(Order::class);
         $deliveryAddress = $order->getDelAddressInfo();
 
         if (is_null($deliveryAddress)) {
-            $address = $this->_getCustomerAddress();
+            $address = $this->getCustomerAddress();
             $address['Type'] = 'delivery';
             $address['FirstName'] = $this->getUser()->oxuser__oxfname->value;
             $address['LastName'] = $this->getUser()->oxuser__oxlname->value;
             return $address;
         }
 
-        $countryCode = DatabaseProvider::getDb()->getOne("SELECT OXISOALPHA2 FROM oxcountry WHERE OXID = '" . $deliveryAddress->oxaddress__oxcountryid->value . "'");
+        $oQueryBuilder
+            ->select('OXISOALPHA2')
+            ->from('oxcountry')
+            ->where('OXID = :oxid')
+            ->setParameter(':oxid', $deliveryAddress->oxaddress__oxcountryid->value);
+        $sCountryCode = $oQueryBuilder->execute();
+        $sCountryCode = $sCountryCode->fetchOne();
 
-        $address = array(
+        $address = [
             'Type' => 'delivery',
             'FirstName' => $deliveryAddress->oxaddress__oxfname->value,
             'LastName' => $deliveryAddress->oxaddress__oxlname->value,
@@ -967,8 +1108,8 @@ class ModelFactory extends Base
             'StreetNumber' => $deliveryAddress->oxaddress__oxstreetnr->value,
             'ZipCode' => $deliveryAddress->oxaddress__oxzip->value,
             'City' => $deliveryAddress->oxaddress__oxcity->value,
-            'CountryCode' => $countryCode
-        );
+            'CountryCode' => $sCountryCode
+        ];
 
         if (!empty($deliveryAddress->oxaddress__oxcompany->value)) {
             $address['Company'] = $deliveryAddress->oxaddress__oxcompany->value;
@@ -982,36 +1123,49 @@ class ModelFactory extends Base
      *
      * @return array
      */
-    private function _getSpecialBasket()
+    private function getSpecialBasket()
     {
-        $shoppingBasket = array();
-        $artnr = array();
+        $shoppingBasket = [];
+        $artnr = [];
 
-        $api = $this->_isNewApi();
+        $api = $this->isNewApi();
 
         $blHasVoucher = false;
         foreach ($this->_basket as $article) {
-            if (substr($article['artnum'], 0, 7) == 'voucher' && stripos($article['artnum'], 'pi-Merchant-Voucher') === false) {
+            if (substr($article['artnum'], 0, 7) == 'voucher' && stripos(
+                    $article['artnum'],
+                    'pi-Merchant-Voucher'
+                ) === false) {
                 $blHasVoucher = true;
             }
         }
 
         foreach ($this->_basket as $article) {
-            if (Registry::getRequest()->getRequestEscapedParameter($article['arthash']) <= 0 && $article['title'] !== 'Credit') {
+            if (Registry::getRequest()->getRequestEscapedParameter(
+                    $article['arthash']
+                ) <= 0 && $article['title'] !== 'Credit') {
                 continue;
             }
             if ($article['artnum'] == 'oxdelivery') {
                 if ($api == true) {
                     $shoppingBasket['Shipping'] = [
                         'Description' => 'Shipping Costs',
-                        'UnitPriceGross' => number_format($article['unitprice'] + ($article['unitprice'] / 100 * $article['vat']), '2', '.', ''),
+                        'UnitPriceGross' => number_format(
+                            $article['unitprice'] + ($article['unitprice'] / 100 * $article['vat']),
+                            '2',
+                            '.',
+                            ''
+                        ),
                         'TaxRate' => $article['vat'],
                     ];
                     continue;
                 }
             }
 
-            if (substr($article['artnum'], 0, 7) == 'voucher' || $article['artnum'] == 'discount' || stripos($article['artnum'], 'pi-Merchant-Voucher') !== false) {
+            if (substr($article['artnum'], 0, 7) == 'voucher' || $article['artnum'] == 'discount' || stripos(
+                    $article['artnum'],
+                    'pi-Merchant-Voucher'
+                ) !== false) {
                 if ($api == true) {
                     if (empty($article['oxtitle'])) {
                         $article['oxtitle'] = $article['title'];
@@ -1029,13 +1183,18 @@ class ModelFactory extends Base
                 }
             }
 
-            $item = array(
+            $item = [
                 'Description' => $article['title'],
                 'ArticleNumber' => $article['artnum'],
                 'Quantity' => Registry::getRequest()->getRequestEscapedParameter($article['arthash']),
-                'UnitPriceGross' => number_format($article['unitprice'] + ($article['unitprice'] / 100 * $article['vat']), '2', '.', ''),
+                'UnitPriceGross' => number_format(
+                    $article['unitprice'] + ($article['unitprice'] / 100 * $article['vat']),
+                    '2',
+                    '.',
+                    ''
+                ),
                 'TaxRate' => $article['vat'],
-            );
+            ];
             if (!empty($article['unique_article_number'])) {
                 $item['UniqueArticleNumber'] = $article['unique_article_number'];
             }
@@ -1051,7 +1210,7 @@ class ModelFactory extends Base
                 $item['UnitPriceGross'] = $article['bruttoprice'];
             }
 
-            $shoppingBasket['Items'][] = array('Item' => $item);
+            $shoppingBasket['Items'][] = ['Item' => $item];
         }
 
         return $shoppingBasket;
@@ -1063,11 +1222,21 @@ class ModelFactory extends Base
      * @return bool
      * @throws ConnectionException
      */
-    private function _isNewApi()
+    private function isNewApi()
     {
-        $api = DatabaseProvider::getDb()->getOne("SELECT RP_API FROM pi_ratepay_orders WHERE TRANSACTION_ID = '" . $this->_transactionId . "'");
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select('RP_API')
+            ->from('pi_ratepay_orders')
+            ->where('TRANSACTION_ID = :transactionId')
+            ->setParameter(':transactionId', $this->_transactionId);
+        $sApi = $oQueryBuilder->execute();
+        $sApi = $sApi->fetchOne();
 
-        if (empty($api) || $api == null) {
+        if (empty($sApi) || $sApi == null) {
             return false;
         }
         return true;
@@ -1078,21 +1247,21 @@ class ModelFactory extends Base
      *
      * @return array
      */
-    private function _getBasket()
+    private function getBasket()
     {
-        $shoppingBasket = array();
+        $shoppingBasket = [];
         $util = oxNew(Utilities::class);
-        $artnr = array();
+        $artnr = [];
 
         foreach ($this->_order->getOrderArticles() as $article) {
-            $item = array(
+            $item = [
                 'Description' => $article->oxorderarticles__oxtitle->value,
                 'ArticleNumber' => $article->oxorderarticles__oxartnum->value,
                 'Quantity' => $article->oxorderarticles__oxamount->value,
                 'UnitPriceGross' => $article->oxorderarticles__oxbprice->value,
                 'TaxRate' => $article->oxorderarticles__oxvat->value,
                 'UniqueArticleNumber' => $article->getId(),
-            );
+            ];
 
             $aPersParams = $article->getPersParams();
             if (!empty($article->getPersParams())) {
@@ -1107,7 +1276,7 @@ class ModelFactory extends Base
                 $item['DescriptionAddition'] = rtrim($sDescriptionAddition, ';');
             }
 
-            $shoppingBasket['Items'][] = array('Item' => $item);
+            $shoppingBasket['Items'][] = ['Item' => $item];
         }
 
         //wrapping costs
@@ -1125,15 +1294,15 @@ class ModelFactory extends Base
             $wrappingCosts = 0;
         }
         if (!empty($wrappingCosts) && $wrappingCosts > 0) {
-            $item = array(
+            $item = [
                 'Description' => 'Wrapping Costs',
                 'ArticleNumber' => 'oxwrapping',
                 'Quantity' => 1,
                 'UnitPriceGross' => $util->getFormattedNumber($wrappingCosts, '2', '.'),
                 'TaxRate' => $util->getFormattedNumber(ceil($wrappingVat), '2', '.'),
-            );
+            ];
 
-            $shoppingBasket['Items'][] = array('Item' => $item);
+            $shoppingBasket['Items'][] = ['Item' => $item];
         }
 
         //giftcard costs
@@ -1151,15 +1320,15 @@ class ModelFactory extends Base
             $giftcardCosts = 0;
         }
         if (!empty($giftcardCosts) && $giftcardCosts > 0) {
-            $item = array(
+            $item = [
                 'Description' => 'Giftcard Costs',
                 'ArticleNumber' => 'oxgiftcard',
                 'Quantity' => 1,
                 'UnitPriceGross' => $util->getFormattedNumber($giftcardCosts, '2', '.'),
                 'TaxRate' => $util->getFormattedNumber(ceil($giftcardVat), '2', '.'),
-            );
+            ];
 
-            $shoppingBasket['Items'][] = array('Item' => $item);
+            $shoppingBasket['Items'][] = ['Item' => $item];
         }
 
         //payment costs
@@ -1178,19 +1347,22 @@ class ModelFactory extends Base
         }
 
         if (!empty($paymentCosts) && $paymentCosts > 0) {
-            $item = array(
+            $item = [
                 'Description' => 'Payment Costs',
                 'ArticleNumber' => 'oxpayment',
                 'Quantity' => 1,
                 'UnitPriceGross' => $util->getFormattedNumber($paymentCosts, '2', '.'),
                 'TaxRate' => $util->getFormattedNumber(ceil($paymentVat), '2', '.'),
-            );
+            ];
 
-            $shoppingBasket['Items'][] = array('Item' => $item);
+            $shoppingBasket['Items'][] = ['Item' => $item];
         }
 
         //trusted protection
-        if (method_exists($this->_basket, 'getTrustedShopProtectionCost') && $this->_basket->getTrustedShopProtectionCost()) {
+        if (method_exists(
+                $this->_basket,
+                'getTrustedShopProtectionCost'
+            ) && $this->_basket->getTrustedShopProtectionCost()) {
             $tsProtectionCosts = $this->_basket->getTrustedShopProtectionCost()->getBruttoPrice();
             $tsProtectionVat = $this->_basket->getTrustedShopProtectionCost()->getVat();
         } elseif (method_exists($this->_basket, 'getTsProtectionCosts') && $this->_basket->getTsProtectionCosts()) {
@@ -1206,15 +1378,15 @@ class ModelFactory extends Base
         }
 
         if (!empty($tsProtectionCosts) && $tsProtectionCosts > 0) {
-            $item = array(
+            $item = [
                 'Description' => 'TS Protection Cost',
                 'ArticleNumber' => 'oxtsprotection',
                 'Quantity' => 1,
                 'UnitPriceGross' => $util->getFormattedNumber($tsProtectionCosts, '2', '.'),
                 'TaxRate' => $util->getFormattedNumber(ceil($tsProtectionVat), '2', '.'),
-            );
+            ];
 
-            $shoppingBasket['Items'][] = array('Item' => $item);
+            $shoppingBasket['Items'][] = ['Item' => $item];
         }
 
         // OX-18
@@ -1225,7 +1397,6 @@ class ModelFactory extends Base
         }
 
         return $shoppingBasket;
-
     }
 
     /**
@@ -1233,31 +1404,49 @@ class ModelFactory extends Base
      *
      * @param $countryId
      * @return false|string
-     * @throws DatabaseConnectionException
      */
-    private function _getCountryCodeById($countryId)
+    private function getCountryCodeById($sCountryId)
     {
-        $oDb = DatabaseProvider::getDb();
-        return $oDb->getOne("SELECT OXISOALPHA2 FROM oxcountry WHERE OXID = ". $oDb->quote($countryId));
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select('OXISOALPHA2')
+            ->from('oxcountry')
+            ->where('OXID = :oxid')
+            ->setParameter(':oxid', $sCountryId);
+        $sOxIsOAlpha2 = $oQueryBuilder->execute();
+        $sOxIsOAlpha2 = $sOxIsOAlpha2->fetchOne();
+        return $sOxIsOAlpha2;
     }
 
     /**
      * @return string
-     * @throws DatabaseConnectionException
      */
     protected function getOrderNumber()
     {
-        $oDb = DatabaseProvider::getDb();
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
 
         if (empty($this->_orderNumber)) {
             if (empty($this->_orderId)) {
                 return '';
             }
-            $orderNr = $oDb->getOne("SELECT OXORDERNR FROM oxorder WHERE OXID = :oxid", [':oxid' => $this->_orderId]);
-            if ($orderNr) {
-                $this->_orderNumber = $orderNr;
-            } else {
 
+            $oQueryBuilder = $oQueryBuilderFactory->create();
+            $oQueryBuilder
+                ->select('OXORDERNR')
+                ->from('oxorder')
+                ->where('OXID = :oxid')
+                ->setParameter(':oxid', $this->_orderId);
+            $sOrderNr = $oQueryBuilder->execute();
+            $sOrderNr = $sOrderNr->fetchOne();
+
+            if ($sOrderNr) {
+                $this->_orderNumber = $sOrderNr;
+            } else {
                 $this->_orderNumber = '';
             }
         }

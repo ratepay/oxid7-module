@@ -1,0 +1,155 @@
+{#
+/**
+ *
+ * Copyright (c) Ratepay GmbH
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+#}
+{% extends "module_config.html.twig" %}
+{% block admin_module_config_form %}
+    {% if oView.piIsRatepayModuleConfig() %}
+        {% if blSaveSuccess == true %}
+            <div class="messagebox" style="color:green;"><b>{{ translate({ ident: "PI_RATEPAY_CONFIGSAVESUCCESS" }) }}</b></div>
+        {% endif %}
+        <div id="ratepay-config-connectiontest" style="margin-bottom: 10px;">
+            <table style="border: 1px solid gray;padding: 2px;margin: 2px;" cellpadding="2" cellspacing="2">
+                <tr>
+                    <th>&nbsp;</th>
+                    <th><img src="{{ oView.piGetFlagUrl('de') }}"></th>
+                    <th><img src="{{ oView.piGetFlagUrl('at') }}"></th>
+                    <th><img src="{{ oView.piGetFlagUrl('ch') }}"></th>
+                    <th><img src="{{ oView.piGetFlagUrl('nl') }}"></th>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>{{ translate({ ident: "PI_RATEPAY_CONFIGTEST_INVOICE" }) }}</strong>
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        {% if oView.piTestConnectionEstablished('invoice', 'de') %}
+                            <span style="color:green;">{{ translate({ ident: "PI_RATEPAY_CONNECTED" }) }}</span>
+                        {% else %}
+                            <span style="color:red;">{{ translate({ ident: "PI_RATEPAY_DISCONNECTED" }) }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        {% if oView.piTestConnectionEstablished('invoice', 'at') %}
+                            <span style="color:green;">{{ translate({ ident: "PI_RATEPAY_CONNECTED" }) }}</span>
+                        {% else %}
+                            <span style="color:red;">{{ translate({ ident: "PI_RATEPAY_DISCONNECTED" }) }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        {% if oView.piTestConnectionEstablished('invoice', 'ch') %}
+                            <span style="color:green;">{{ translate({ ident: "PI_RATEPAY_CONNECTED" }) }}</span>
+                        {% else %}
+                            <span style="color:red;">{{ translate({ ident: "PI_RATEPAY_DISCONNECTED" }) }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        {% if oView.piTestConnectionEstablished('invoice', 'nl') %}
+                            <span style="color:green;">{{ translate({ ident: "PI_RATEPAY_CONNECTED" }) }}</span>
+                        {% else %}
+                            <span style="color:red;">{{ translate({ ident: "PI_RATEPAY_DISCONNECTED" }) }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>{{ translate({ ident: "PI_RATEPAY_CONFIGTEST_INSTALLMENT" }) }}</strong>
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        {% if oView.piTestConnectionEstablished('installment', 'de') %}
+                            <span style="color:green;">{{ translate({ ident: "PI_RATEPAY_CONNECTED" }) }}</span>
+                        {% else %}
+                            <span style="color:red;">{{ translate({ ident: "PI_RATEPAY_DISCONNECTED" }) }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        {% if oView.piTestConnectionEstablished('installment', 'at') %}
+                            <span style="color:green;">{{ translate({ ident: "PI_RATEPAY_CONNECTED" }) }}</span>
+                        {% else %}
+                            <span style="color:red;">{{ translate({ ident: "PI_RATEPAY_DISCONNECTED" }) }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        <span style="color:lightgray;">{{ translate({ ident: "PI_RATEPAY_UNAVAILABLE" }) }}</span>
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        <span style="color:lightgray;">{{ translate({ ident: "PI_RATEPAY_UNAVAILABLE" }) }}</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>{{ translate({ ident: "PI_RATEPAY_CONFIGTEST_INSTALLMENT0" }) }}</strong>
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        {% if oView.piTestConnectionEstablished('installment0', 'de') %}
+                        <span style="color:green;">{{ translate({ ident: "PI_RATEPAY_CONNECTED" }) }}</span>
+                        {% else %}
+                        <span style="color:red;">{{ translate({ ident: "PI_RATEPAY_DISCONNECTED" }) }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        {% if oView.piTestConnectionEstablished('installment0', 'at') %}
+                        <span style="color:green;">{{ translate({ ident: "PI_RATEPAY_CONNECTED" }) }}</span>
+                        {% else %}
+                        <span style="color:red;">{{ translate({ ident: "PI_RATEPAY_DISCONNECTED" }) }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        <span style="color:lightgray;">{{ translate({ ident: "PI_RATEPAY_UNAVAILABLE" }) }}</span>
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        <span style="color:lightgray;">{{ translate({ ident: "PI_RATEPAY_UNAVAILABLE" }) }}</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>{{ translate({ ident: "PI_RATEPAY_CONFIGTEST_ELV" }) }}</strong>
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        {% if oView.piTestConnectionEstablished('elv', 'de') %}
+                            <span style="color:green;">{{ translate({ ident: "PI_RATEPAY_CONNECTED" }) }}</span>
+                        {% else %}
+                            <span style="color:red;">{{ translate({ ident: "PI_RATEPAY_DISCONNECTED" }) }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        {% if oView.piTestConnectionEstablished('elv', 'at') %}
+                            <span style="color:green;">{{ translate({ ident: "PI_RATEPAY_CONNECTED" }) }}</span>
+                        {% else %}
+                            <span style="color:red;">{{ translate({ ident: "PI_RATEPAY_DISCONNECTED" }) }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        <span style="color:lightgray;">{{ translate({ ident: "PI_RATEPAY_UNAVAILABLE" }) }}</span>
+                    </td>
+                    <td style="border: 1px solid gray;">
+                        {% if oView.piTestConnectionEstablished('elv', 'nl') %}
+                            <span style="color:green;">{{ translate({ ident: "PI_RATEPAY_CONNECTED" }) }}</span>
+                        {% else %}
+                            <span style="color:red;">{{ translate({ ident: "PI_RATEPAY_DISCONNECTED" }) }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    {% endif %}
+    {{ parent() }}
+{% endblock %}
+{% block admin_module_config_var_type_select %}
+    {% if module_var == 'sRPInstallmentSettlement' or module_var == 'sRPAustriaInstallmentSettlement' %}
+        {% set aAvailableSettlementTypes = oView.piGetAvailableSettlementTypes(module_var) %}
+        <select class="select" name="confselects[{{ module_var }}]" {{ readonly }}>
+            {% for _field in var_constraints.module_var %}
+                {% if aAvailableSettlementTypes in _field %}
+                    <option value="{{ _field|escape }}"  {% if (confselects.module_var==_field) %}selected{% endif %}>{{ translate({ ident: "SHOP_MODULE_`module_var`_`_field`" }) }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

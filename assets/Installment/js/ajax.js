@@ -1,10 +1,9 @@
 /**
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @package pi_ratepay_rate_calculator
- * Code by PayIntelligent GmbH  <http://www.payintelligent.de/>
+ * Copyright (c) Ratepay GmbH
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 function piRatepayRateCalculatorAction(mode, paymentMethod, month) {
@@ -15,7 +14,8 @@ function piRatepayRateCalculatorAction(mode, paymentMethod, month) {
 
     document.getElementById(paymentMethod + '_month').value = month;
     document.getElementById(paymentMethod + '_mode').value = mode;
-    document.getElementById('paymentNextStepBottom').disabled = false;
+    document.querySelector('.sticky-md-top .btn').disabled = false;
+
 
     if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
         xmlhttp = new XMLHttpRequest();
@@ -30,16 +30,26 @@ function piRatepayRateCalculatorAction(mode, paymentMethod, month) {
         shop = document.getElementsByName("shp")[0].value;
     }
 
+    if (mode == 'rate') {
+        calcValue = document.getElementById(paymentMethod + '_rp-rate-value').value;
+        calcMethod = 'calculation-by-rate';
+    } else if (mode == 'runtime') {
+        calcValue = month;
+        calcMethod = 'calculation-by-time';
+    }
+
     if (document.getElementById(paymentMethod + '_pi_ratepay_rate_bank_iban') !== null) {
         if (document.getElementById(paymentMethod + '_pi_ratepay_rate_bank_iban').style.display !== 'none') {
-            document.getElementById(paymentMethod + '_rp-rate-elv').style.display = 'block';
-            document.getElementById('paymentNextStepBottom').disabled = true;
+            if (calcValue > 0) {
+                document.getElementById(paymentMethod + '_rp-rate-elv').style.display = 'block';
+            }
+            document.querySelector('.sticky-md-top .btn').disabled = true;
 
             if (document.getElementById(paymentMethod + '_pi_ratepay_rate_bank_iban').style.display === 'block'
                 && document.getElementById(paymentMethod + '_pi_ratepay_rate_bank_iban').value !== ''
                 && document.getElementById(paymentMethod + '_rp-sepa-aggreement').checked === true
             ) {
-                document.getElementById('paymentNextStepBottom').disabled = false;
+                document.querySelector('.sticky-md-top .btn').disabled = false;
             }
 
             var bankAccount;
@@ -50,19 +60,12 @@ function piRatepayRateCalculatorAction(mode, paymentMethod, month) {
             }
             paymentFirstday = document.getElementById(paymentMethod + '_paymentFirstday').value;
         }
+        if (calcValue <= 0) {
+            document.getElementById(paymentMethod + '_rp-rate-elv').style.display = 'none';
+        }
     } else {
-        document.getElementById('paymentNextStepBottom').disabled = false;
+        document.querySelector('.sticky-md-top .btn').disabled = false;
     }
-
-    if (mode == 'rate') {
-        calcValue = document.getElementById(paymentMethod + '_rp-rate-value').value;
-        calcMethod = 'calculation-by-rate';
-
-    } else if (mode == 'runtime') {
-        calcValue = month;
-        calcMethod = 'calculation-by-time';
-    }
-
     xmlhttp.open("POST", pi_ratepay_rate_calc_path + "Php/PiRatepayRateCalcRequest.php", false);
 
     xmlhttp.setRequestHeader("Content-Type",
@@ -146,13 +149,17 @@ function piLoadrateResult(paymentMethod) {
     } else{
         shop = document.getElementsByName("shp")[0].value;
     }
-    
+
     xmlhttp.open("POST", pi_ratepay_rate_calc_path + "Php/PiRatepayRateCalcRequest.php", false);
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const controller = urlParams.get('cl')
 
     xmlhttp.setRequestHeader("Content-Type",
         "application/x-www-form-urlencoded");
 
-    xmlhttp.send("stoken=" + stoken + "&shp=" + shop + "&smethod=" + paymentMethod);
+    xmlhttp.send("stoken=" + stoken + "&shp=" + shop + "&smethod=" + paymentMethod + "&cl=" + controller);
 
     if (xmlhttp.responseText != null) {
         html = xmlhttp.responseText;
