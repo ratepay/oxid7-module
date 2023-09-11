@@ -9,9 +9,8 @@
 |Version | `7.0.0`
 |Link | http://www.ratepay.com
 |Mail | integration@ratepay.com
-|Installation | https://ratepay.gitbook.io/oxid/
-|Terms of service / Nutzungsbedingungen | https://www.ratepay.com/legal-payment-terms/
-|Legal Disclaimer|https://ratepay.gitbook.io/docs/#legal-disclaimer
+|Full Documentation | [click here](https://docs.ratepay.com/docs/developer/shop_modules/oxid/ratepay_payment_plugin_for_oxid/)|
+|Legal Disclaimer   | [click here](https://docs.ratepay.com/docs/developer/shop_modules/overview/)| 
 
 ## Changelog
 
