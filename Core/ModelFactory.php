@@ -584,8 +584,8 @@ class ModelFactory extends Base
     private function getHead()
     {
         if ($this->_profileId && $this->_securityCode) {
-            $profileId = $this->_profileId;
-            $securityCode = $this->_securityCode;
+            $sProfileId = $this->_profileId;
+            $sSecurityCode = $this->_securityCode;
         } else {
             $this->piSetCountryIdByUser();
             $util = oxNew(Utilities::class);

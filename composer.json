@@ -22,7 +22,7 @@
     "lib-openssl": ">=1.0.1",
     "ext-curl": "*",
     "ext-openssl": "*",
-    "ratepay/php-library": "^1.8.0"
+    "ratepay/php-library": "^1.8.4"
   },
   "autoload": {
     "psr-4": {

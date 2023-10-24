@@ -13,15 +13,26 @@
     {{ script({ include: oViewConf.getModuleUrl('ratepay')~"Installment/js/libs/jquery-ui.min.js", dynamic: __oxid_include_dynamic }) }}
     {% if isset(pi_ratepay_dfp_token) %}
         <script language="JavaScript" async>
-            var di = {t:'{{ pi_ratepay_dfp_token }}',v:'{{ pi_ratepay_dfp_snippet_id }}',l:'Checkout'};
+            function piCheckFingerprint () {
+                if (typeof blInserted == 'undefined') {
+                    var diSkriptVar = document.createElement('script');
+                    diSkriptVar.type = 'text/javascript';
+                    diSkriptVar.text =  "var blInserted = true;var di = {t:'{{ pi_ratepay_dfp_token }}',v:'{{ pi_ratepay_dfp_snippet_id }}',l:'Checkout'};";
+                    document.getElementsByTagName('head')[0].appendChild(diSkriptVar);
+
+                    var diSkript = document.createElement('script');
+                    diSkript.type = 'text/javascript';
+                    diSkript.src = '//d.ratepay.com/{{ pi_ratepay_dfp_snippet_id }}/di.js';
+                    document.getElementsByTagName('head')[0].appendChild(diSkript);
+                }
+            }
         </script>
-        <script type="text/javascript" src="//d.ratepay.com/{{ pi_ratepay_dfp_snippet_id }}/di.js" async></script>
-        <noscript><link rel="stylesheet" type="text/css" href="//d.ratepay.com/di.css?t={{ pi_ratepay_dfp_token }}&v={{ pi_ratepay_dfp_snippet_id }}&l=Checkout"></noscript>
-        <object type="application/x-shockwave-flash" data="//d.ratepay.com/{{ pi_ratepay_dfp_snippet_id }}/c.swf" style="float: right; visibility: hidden; height: 0px; width: 0px;">
-            <param name="movie" value="//d.ratepay.com/{{ pi_ratepay_dfp_snippet_id }}/c.swf" />
-            <param name="flashvars" value="t={{ pi_ratepay_dfp_token }}&v={{ pi_ratepay_dfp_snippet_id }}&l=Checkout"/>
-            <param name="AllowScriptAccess" value="always"/>
-        </object>
+    {% else %}
+        <script language="JavaScript" async>
+            function   piCheckFingerprint () {
+                return false;
+            }
+        </script>
     {% endif %}
 
     {% for pierror in piRatepayErrors %}
@@ -57,9 +68,9 @@
         {% endif %}
 
         {% if pierror == "-406" %}
-        <div class="alert alert-danger" role="alert">
-            <p>{{ translate({ ident: "PI_RATEPAY_RECHNUNG_ERROR_ZIP" }) }}</p>
-        </div>
+            <div class="alert alert-danger" role="alert">
+                <p>{{ translate({ ident: "PI_RATEPAY_RECHNUNG_ERROR_ZIP" }) }}</p>
+            </div>
         {% endif %}
 
         {% if pierror == "-414" %}
@@ -88,9 +99,9 @@
         {% endif %}
 
         {% if pierror == "-413" %}
-        <div class="alert alert-danger" role="alert">
-            <p>{{ translate({ ident: "PI_RATEPAY_RATE_ERROR_ZIP" }) }}</p>
-        </div>
+            <div class="alert alert-danger" role="alert">
+                <p>{{ translate({ ident: "PI_RATEPAY_RATE_ERROR_ZIP" }) }}</p>
+            </div>
         {% endif %}
 
         {% if pierror == "-415" %}
@@ -158,9 +169,9 @@
         {% endif %}
 
         {% if pierror == "-511" %}
-        <div class="alert alert-danger" role="alert">
-            <p>{{ translate({ ident: "PI_RATEPAY_ELV_ERROR_ZIP" }) }}</p>
-        </div>
+            <div class="alert alert-danger" role="alert">
+                <p>{{ translate({ ident: "PI_RATEPAY_ELV_ERROR_ZIP" }) }}</p>
+            </div>
         {% endif %}
 
         <!-- All -->
@@ -279,7 +290,10 @@
     {% if sPaymentID == "pi_ratepay_rechnung" %}
         {% set dynvalue = oView.getDynValue() %}
         <div class="payment-option">
-            <input id="payment_{{ sPaymentID }}" class="form-check-input" type="radio" onclick="piCalculator();" name="paymentid" value="{{ sPaymentID }}" {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %} style="position:relative;">
+            {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}
+                {{ script({ add: "piCheckFingerprint();", dynamic: __oxid_include_dynamic }) }}
+            {% endif %}
+            <input id="payment_{{ sPaymentID }}" class="form-check-input" type="radio" onclick="piCalculator(); piCheckFingerprint();" name="paymentid" value="{{ sPaymentID }}" {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %} style="position:relative;">
             <label for="payment_{{ sPaymentID }}">{{ paymentmethod.oxpayments__oxdesc.value }}</label>
             <div class="pi_ratepay_inner {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}activePayment{% else %} d-none{% endif %}">
                 {% if pi_ratepay_rechnung_sandbox_notification == 1  %}
@@ -333,8 +347,11 @@
 
     {% if sPaymentID == "pi_ratepay_rate" %}
         {% set dynvalue = oView.getDynValue() %}
+        {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}
+            {{ script({ add: "piCheckFingerprint();", dynamic: __oxid_include_dynamic }) }}
+        {% endif %}
         <div class="payment-option">
-            <input id="payment_{{ sPaymentID }}" class="form-check-input" type="radio" onclick="piCalculator();" name="paymentid" value="{{ sPaymentID }}" {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %} style="position:relative;">
+            <input id="payment_{{ sPaymentID }}" class="form-check-input" type="radio" onclick="piCalculator(); piCheckFingerprint();" name="paymentid" value="{{ sPaymentID }}" {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %} style="position:relative;">
             <label for="payment_{{ sPaymentID }}">{{ paymentmethod.oxpayments__oxdesc.value }}</label>
             <div class="pi_ratepay_inner {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}activePayment{% else %} d-none{% endif %}">
                 {% if pi_ratepay_rate_sandbox_notification == 1  %}
@@ -430,8 +447,11 @@
     {% endif %}
     {% if sPaymentID == "pi_ratepay_rate0" %}
         {% set dynvalue = oView.getDynValue() %}
+        {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}
+            {{ script({ add: "piCheckFingerprint();", dynamic: __oxid_include_dynamic }) }}
+        {% endif %}
         <div class="payment-option">
-            <input id="payment_{{ sPaymentID }}" class="form-check-input" type="radio" onclick="piCalculator(); autoLoadPiCalculator('pi_ratepay_rate0');" name="paymentid" value="{{ sPaymentID }}" {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %} style="position:relative;">
+            <input id="payment_{{ sPaymentID }}" class="form-check-input" type="radio" onclick="piCalculator(); autoLoadPiCalculator('pi_ratepay_rate0'); piCheckFingerprint();" name="paymentid" value="{{ sPaymentID }}" {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %} style="position:relative;">
             <label for="payment_{{ sPaymentID }}">{{ paymentmethod.oxpayments__oxdesc.value }}</label>
             <div class="pi_ratepay_inner {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}activePayment{% else %} d-none{% endif %}">
                 {% if pi_ratepay_rate0_sandbox_notification == 1  %}
@@ -529,13 +549,16 @@
 
     {% if sPaymentID == "pi_ratepay_elv" %}
         {% set dynvalue = oView.getDynValue() %}
+        {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}
+            {{ script({ add: "piCheckFingerprint();", dynamic: __oxid_include_dynamic }) }}
+        {% endif %}
         <script type="text/javascript">
             document.addEventListener('DOMContentLoaded', function(){
                 checkElvForm();
             }, false);
         </script>
         <div class="payment-option">
-            <input id="payment_{{ sPaymentID }}" class="form-check-input" type="radio" onclick="piCalculator();checkElvForm();" name="paymentid" value="{{ sPaymentID }}" {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %} style="position:relative;">
+            <input id="payment_{{ sPaymentID }}" class="form-check-input" type="radio" onclick="piCalculator(); checkElvForm(); piCheckFingerprint();" name="paymentid" value="{{ sPaymentID }}" {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %} style="position:relative;">
             <label for="payment_{{ sPaymentID }}">{{ paymentmethod.oxpayments__oxdesc.value }}</label>
             <div class="pi_ratepay_inner {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}activePayment{% else %} d-none{% endif %}">
                 {% if pi_ratepay_elv_sandbox_notification == 1  %}

@@ -23,6 +23,26 @@ use OxidEsales\Eshop\Core\Registry;
 class RatepayOrder extends RatepayOrder_parent
 {
     /**
+     * Loads basket \OxidEsales\Eshop\Core\Session::getBasket(), sets $this->oBasket->blCalcNeeded = true to
+     * recalculate, sets back basket to session \OxidEsales\Eshop\Core\Session::setBasket(), executes
+     * parent::init().
+     */
+    public function init()
+    {
+        parent::init();
+
+        $DeviceFingerprintToken = Registry::getSession()->getVariable('pi_ratepay_dfp_token');
+        $DeviceFingerprintSnippetId = Registry::getConfig()->getConfigParam('sRPDeviceFingerprintSnippetId');
+        if (!empty($DeviceFingerprintToken)) {
+            if (empty($DeviceFingerprintSnippetId)) {
+                $DeviceFingerprintSnippetId = 'ratepay'; // default value, so that there is always a device fingerprint
+            }
+            $this->addTplParam('pi_ratepay_dfp_token', $DeviceFingerprintToken);
+            $this->addTplParam('pi_ratepay_dfp_snippet_id', $DeviceFingerprintSnippetId);
+        }
+    }
+
+    /**
      * Check if this is a OXID 4.6.x Shop.
      * @return bool
      */

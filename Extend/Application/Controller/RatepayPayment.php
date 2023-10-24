@@ -1073,7 +1073,7 @@ class RatepayPayment extends RatepayPayment_parent
         if (empty($DeviceFingerprintSnippetId)) {
             $DeviceFingerprintSnippetId = 'ratepay'; // default value, so that there is always a device fingerprint
         }
-        
+
         if (empty($DeviceFingerprintToken)) {
             $timestamp = microtime();
             $sessionId = Registry::getSession()->getId();
@@ -1081,6 +1081,9 @@ class RatepayPayment extends RatepayPayment_parent
 
             Registry::getSession()->setVariable('pi_ratepay_dfp_token', $token);
             $this->addTplParam('pi_ratepay_dfp_token', $token);
+            $this->addTplParam('pi_ratepay_dfp_snippet_id', $DeviceFingerprintSnippetId);
+        } else {
+            $this->addTplParam('pi_ratepay_dfp_token', $DeviceFingerprintToken);
             $this->addTplParam('pi_ratepay_dfp_snippet_id', $DeviceFingerprintSnippetId);
         }
     }
