@@ -31,7 +31,7 @@ class RatepayOxorder extends RatepayOxorder_parent
             if (!$this->oxorder__oxordernr->value) {
                 $this->setNumber();
             } else {
-                oxNew(Counter::class)->update($this->_getCounterIdent(), $this->oxorder__oxordernr->value);
+                oxNew(Counter::class)->update($this->getCounterIdent(), $this->oxorder__oxordernr->value);
             }
         }
 

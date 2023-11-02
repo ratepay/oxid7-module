@@ -408,6 +408,7 @@ class ModelFactory extends Base
         $rb = oxNew(RequestBuilder::class, $this->_sandbox);
 
         $paymentConfirm = $rb->callPaymentConfirm($mbHead);
+
         LogsService::getInstance()->logRatepayTransaction(
             $this->getOrderNumber(),
             $this->_transactionId,
@@ -460,11 +461,13 @@ class ModelFactory extends Base
         $mbContent = oxNew(ModelBuilder::class, 'Content');
 
         $this->getOrderCountryId();
+
         $mbHead = $this->getHead();
 
         $shoppingBasket = [
             'ShoppingBasket' => $this->getSpecialBasket(),
         ];
+
         $mbContent->setArray($shoppingBasket);
 
         // OX-31 Add invoice number if existing
@@ -589,7 +592,6 @@ class ModelFactory extends Base
         } else {
             $this->piSetCountryIdByUser();
             $util = oxNew(Utilities::class);
-            $oConfig = Registry::getConfig();
             $paymentMethod = $util->getPaymentMethod($this->_paymentType);
             $paymentMethod = strtolower($paymentMethod);
             $country = $this->getCountryCodeById($this->_countryId);
@@ -632,6 +634,7 @@ class ModelFactory extends Base
         }
 
         $modelBuilder->setArray($headArray);
+
         if (!empty($this->_orderId)) {
             $oContainer = ContainerFactory::getInstance()->getContainer();
             /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
@@ -672,7 +675,6 @@ class ModelFactory extends Base
 
         $rb = oxNew(RequestBuilder::class, $this->_sandbox);
         $profileRequest = $rb->callProfileRequest($head);
-
         if ($profileRequest->isSuccessful()) {
             return $profileRequest->getResult();
         }
@@ -1212,6 +1214,11 @@ class ModelFactory extends Base
 
             $shoppingBasket['Items'][] = ['Item' => $item];
         }
+
+        $oOrder = oxNew(Order::class);
+        $oOrder->load($this->_orderId);
+        $oCurrency = $oOrder->getOrderCurrency();
+        $shoppingBasket['Currency'] = $oCurrency->name;
 
         return $shoppingBasket;
     }

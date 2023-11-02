@@ -337,6 +337,22 @@
                     {% endif %}
                 </ul>
             </div>
+            {% if paymentmethod.getPrice() %}
+                <div class="payment-option-price">
+                    {% set oPaymentPrice = paymentmethod.getPrice() %}
+                    {% if oViewConf.isFunctionalityEnabled('blShowVATForPayCharge') %}
+                        {% apply spaceless %}
+                            {{ format_price(oPaymentPrice.getNettoPrice(), { currency: currency }) }}
+                            {% if oPaymentPrice.getVatValue() > 0 %}
+                                {{ translate({ ident: "PLUS_VAT" }) }} {{ format_price(oPaymentPrice.getVatValue(), { currency: currency }) }}
+                            {% endif %}
+                        {% endapply %}
+                    {% else %}
+                        {{ format_price(oPaymentPrice.getBruttoPrice(), { currency: currency }) }}
+                    {% endif %}
+                </div>
+
+            {% endif %}
         </div>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
@@ -433,6 +449,22 @@
                     }
                 ", dynamic: __oxid_include_dynamic }) }}
             </div>
+            {% if paymentmethod.getPrice() %}
+                <div class="payment-option-price">
+                    {% set oPaymentPrice = paymentmethod.getPrice() %}
+                    {% if oViewConf.isFunctionalityEnabled('blShowVATForPayCharge') %}
+                        {% apply spaceless %}
+                            {{ format_price(oPaymentPrice.getNettoPrice(), { currency: currency }) }}
+                            {% if oPaymentPrice.getVatValue() > 0 %}
+                                {{ translate({ ident: "PLUS_VAT" }) }} {{ format_price(oPaymentPrice.getVatValue(), { currency: currency }) }}
+                            {% endif %}
+                        {% endapply %}
+                    {% else %}
+                        {{ format_price(oPaymentPrice.getBruttoPrice(), { currency: currency }) }}
+                    {% endif %}
+                </div>
+
+            {% endif %}
         </div>
 
         <script>
@@ -533,6 +565,22 @@
                     }
                 ", dynamic: __oxid_include_dynamic }) }}
             </div>
+            {% if paymentmethod.getPrice() %}
+                <div class="payment-option-price">
+                    {% set oPaymentPrice = paymentmethod.getPrice() %}
+                    {% if oViewConf.isFunctionalityEnabled('blShowVATForPayCharge') %}
+                        {% apply spaceless %}
+                            {{ format_price(oPaymentPrice.getNettoPrice(), { currency: currency }) }}
+                            {% if oPaymentPrice.getVatValue() > 0 %}
+                                {{ translate({ ident: "PLUS_VAT" }) }} {{ format_price(oPaymentPrice.getVatValue(), { currency: currency }) }}
+                            {% endif %}
+                        {% endapply %}
+                    {% else %}
+                        {{ format_price(oPaymentPrice.getBruttoPrice(), { currency: currency }) }}
+                    {% endif %}
+                </div>
+
+            {% endif %}
         </div>
 
         <script>
@@ -648,6 +696,22 @@
                     </table>
                 </div>
             </div>
+            {% if paymentmethod.getPrice() %}
+                <div class="payment-option-price">
+                    {% set oPaymentPrice = paymentmethod.getPrice() %}
+                    {% if oViewConf.isFunctionalityEnabled('blShowVATForPayCharge') %}
+                        {% apply spaceless %}
+                            {{ format_price(oPaymentPrice.getNettoPrice(), { currency: currency }) }}
+                            {% if oPaymentPrice.getVatValue() > 0 %}
+                                {{ translate({ ident: "PLUS_VAT" }) }} {{ format_price(oPaymentPrice.getVatValue(), { currency: currency }) }}
+                            {% endif %}
+                        {% endapply %}
+                    {% else %}
+                        {{ format_price(oPaymentPrice.getBruttoPrice(), { currency: currency }) }}
+                    {% endif %}
+                </div>
+
+            {% endif %}
         </div>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
