@@ -1086,6 +1086,15 @@ class RatepayPayment extends RatepayPayment_parent
             $this->addTplParam('pi_ratepay_dfp_token', $DeviceFingerprintToken);
             $this->addTplParam('pi_ratepay_dfp_snippet_id', $DeviceFingerprintSnippetId);
         }
+        $blRatepayScriptSend = Registry::getSession()->getVariable('pi_ratepay_script_send');
+        if (!empty($blRatepayScriptSend)) {
+            $this->addTplParam('pi_ratepay_script_send', $blRatepayScriptSend);
+        }
+
+    }
+
+    public function setDiScriptSendAjax() {
+        Registry::getSession()->setVariable('pi_ratepay_script_send', 1);
     }
 
     private function isSaveBankDataSet()

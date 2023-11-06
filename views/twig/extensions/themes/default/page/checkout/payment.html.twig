@@ -14,6 +14,7 @@
     {% if isset(pi_ratepay_dfp_token) %}
         <script language="JavaScript" async>
             function piCheckFingerprint () {
+                {% if isset(pi_ratepay_script_send) is empty %}
                 if (typeof blInserted == 'undefined') {
                     var diSkriptVar = document.createElement('script');
                     diSkriptVar.type = 'text/javascript';
@@ -24,7 +25,12 @@
                     diSkript.type = 'text/javascript';
                     diSkript.src = '//d.ratepay.com/{{ pi_ratepay_dfp_snippet_id }}/di.js';
                     document.getElementsByTagName('head')[0].appendChild(diSkript);
+                    $.ajax({
+                        type: "POST",
+                        url: '/index.php?cl=RatepayPayment&fnc=setDiScriptSendAjax',
+                    });
                 }
+                {% endif %}
             }
         </script>
     {% else %}
