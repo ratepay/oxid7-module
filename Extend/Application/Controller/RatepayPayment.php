@@ -20,6 +20,7 @@ use pi\ratepay\Application\Model\Settings;
 use pi\ratepay\Core\PaymentBan;
 use pi\ratepay\Core\Utilities;
 use pi\ratepay\Extend\Application\Model\RatepayOxorder;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
 
 /**
  * {@inheritdoc}
@@ -1068,10 +1069,12 @@ class RatepayPayment extends RatepayPayment_parent
      */
     private function setDeviceFingerPrint()
     {
+        $moduleSettingService = $this->getModuleSettings();
         $DeviceFingerprintToken = Registry::getSession()->getVariable('pi_ratepay_dfp_token');
-        $DeviceFingerprintSnippetId = Registry::getConfig()->getConfigParam('sRPDeviceFingerprintSnippetId');
-        if (empty($DeviceFingerprintSnippetId)) {
-            $DeviceFingerprintSnippetId = 'ratepay'; // default value, so that there is always a device fingerprint
+        $DeviceFingerprintSnippetId = $moduleSettingService->getString('sRPDeviceFingerprintSnippetId', 'ratepay');
+
+        if ($DeviceFingerprintSnippetId->length() <= 0) {
+            $DeviceFingerprintSnippetId = 'C9rKgOt'; // default value, so that there is always a device fingerprint
         }
 
         if (empty($DeviceFingerprintToken)) {
@@ -1128,6 +1131,17 @@ class RatepayPayment extends RatepayPayment_parent
         $string = preg_replace('/[^a-zA-Z0-9]/', '', $string);
         $string = strtoupper($string);
         return $string;
+    }
+
+    /**
+     * @return mixed
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    protected function getModuleSettings() {
+        return ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(ModuleSettingServiceInterface::class);
     }
 
 }

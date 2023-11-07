@@ -3,6 +3,8 @@
 namespace pi\ratepay\Extend\Application\Controller;
 
 use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
 
 /**
  *
@@ -31,11 +33,12 @@ class RatepayOrder extends RatepayOrder_parent
     {
         parent::init();
 
+        $moduleSettingService = $this->getModuleSettings();
         $DeviceFingerprintToken = Registry::getSession()->getVariable('pi_ratepay_dfp_token');
-        $DeviceFingerprintSnippetId = Registry::getConfig()->getConfigParam('sRPDeviceFingerprintSnippetId');
+        $DeviceFingerprintSnippetId = $moduleSettingService->getString('sRPDeviceFingerprintSnippetId', 'ratepay');;
         if (!empty($DeviceFingerprintToken)) {
-            if (empty($DeviceFingerprintSnippetId)) {
-                $DeviceFingerprintSnippetId = 'ratepay'; // default value, so that there is always a device fingerprint
+            if ($DeviceFingerprintSnippetId->length() <= 0) {
+                $DeviceFingerprintSnippetId = 'C9rKgOt'; // default value, so that there is always a device fingerprint
             }
             $this->addTplParam('pi_ratepay_dfp_token', $DeviceFingerprintToken);
             $this->addTplParam('pi_ratepay_dfp_snippet_id', $DeviceFingerprintSnippetId);
@@ -97,6 +100,17 @@ class RatepayOrder extends RatepayOrder_parent
                 $session->deleteVariable($key);
             }
         }
+    }
+
+    /**
+     * @return mixed
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    protected function getModuleSettings() {
+        return ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(ModuleSettingServiceInterface::class);
     }
 }
 
