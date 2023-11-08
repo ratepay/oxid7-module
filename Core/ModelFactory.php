@@ -646,10 +646,10 @@ class ModelFactory extends Base
                 ->where('oxid = :oxid')
                 ->setParameter(':oxid', $this->_orderId);
             $sOrderNr = $oQueryBuilder->execute();
-            $external['External']['OrderId'] = $sOrderNr->fetchOne();
+            $external['External']['OrderId'] = (string) $sOrderNr->fetchOne();
         }
         if (!empty($this->_customerId)) {
-            $external['External']['MerchantConsumerId'] = $this->_customerId;
+            $external['External']['MerchantConsumerId'] = (string) $this->_customerId;
         }
 
         if (!empty($this->_deviceToken)) {
