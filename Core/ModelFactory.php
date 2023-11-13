@@ -646,10 +646,10 @@ class ModelFactory extends Base
                 ->where('oxid = :oxid')
                 ->setParameter(':oxid', $this->_orderId);
             $sOrderNr = $oQueryBuilder->execute();
-            $external['External']['OrderId'] = $sOrderNr->fetchOne();
+            $external['External']['OrderId'] = (string) $sOrderNr->fetchOne();
         }
         if (!empty($this->_customerId)) {
-            $external['External']['MerchantConsumerId'] = $this->_customerId;
+            $external['External']['MerchantConsumerId'] = (string) $this->_customerId;
         }
 
         if (!empty($this->_deviceToken)) {
@@ -1300,13 +1300,16 @@ class ModelFactory extends Base
         } else {
             $wrappingCosts = 0;
         }
+
         if (!empty($wrappingCosts) && $wrappingCosts > 0) {
+            $pos = strpos($wrappingVat, '.');
+            $wrappingVat = substr($wrappingVat, 0, $pos+2);
             $item = [
                 'Description' => 'Wrapping Costs',
                 'ArticleNumber' => 'oxwrapping',
                 'Quantity' => 1,
                 'UnitPriceGross' => $util->getFormattedNumber($wrappingCosts, '2', '.'),
-                'TaxRate' => $util->getFormattedNumber(ceil($wrappingVat), '2', '.'),
+                'TaxRate' => $util->getFormattedNumber($wrappingVat, '2', '.'),
             ];
 
             $shoppingBasket['Items'][] = ['Item' => $item];
@@ -1327,12 +1330,14 @@ class ModelFactory extends Base
             $giftcardCosts = 0;
         }
         if (!empty($giftcardCosts) && $giftcardCosts > 0) {
+            $pos = strpos($giftcardVat, '.');
+            $giftcardVat = substr($giftcardVat, 0, $pos+2);
             $item = [
                 'Description' => 'Giftcard Costs',
                 'ArticleNumber' => 'oxgiftcard',
                 'Quantity' => 1,
                 'UnitPriceGross' => $util->getFormattedNumber($giftcardCosts, '2', '.'),
-                'TaxRate' => $util->getFormattedNumber(ceil($giftcardVat), '2', '.'),
+                'TaxRate' => $util->getFormattedNumber($giftcardVat, '2', '.'),
             ];
 
             $shoppingBasket['Items'][] = ['Item' => $item];
