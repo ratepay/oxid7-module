@@ -1302,6 +1302,7 @@ class ModelFactory extends Base
         }
 
         if (!empty($wrappingCosts) && $wrappingCosts > 0) {
+            $wrappingVat = round($wrappingVat, 1);
             $pos = strpos($wrappingVat, '.');
             $wrappingVat = substr($wrappingVat, 0, $pos+2);
             $item = [
@@ -1329,7 +1330,9 @@ class ModelFactory extends Base
         } else {
             $giftcardCosts = 0;
         }
+
         if (!empty($giftcardCosts) && $giftcardCosts > 0) {
+            $giftcardVat = round($giftcardVat, 1);
             $pos = strpos($giftcardVat, '.');
             $giftcardVat = substr($giftcardVat, 0, $pos+2);
             $item = [
@@ -1359,12 +1362,15 @@ class ModelFactory extends Base
         }
 
         if (!empty($paymentCosts) && $paymentCosts > 0) {
+            $paymentVat = round($paymentVat, 1);
+            $pos = strpos($paymentVat, '.');
+            $paymentVat = substr($paymentVat, 0, $pos+2);
             $item = [
                 'Description' => 'Payment Costs',
                 'ArticleNumber' => 'oxpayment',
                 'Quantity' => 1,
                 'UnitPriceGross' => $util->getFormattedNumber($paymentCosts, '2', '.'),
-                'TaxRate' => $util->getFormattedNumber(ceil($paymentVat), '2', '.'),
+                'TaxRate' => $util->getFormattedNumber($paymentVat, '2', '.'),
             ];
 
             $shoppingBasket['Items'][] = ['Item' => $item];
@@ -1390,12 +1396,15 @@ class ModelFactory extends Base
         }
 
         if (!empty($tsProtectionCosts) && $tsProtectionCosts > 0) {
+            $tsProtectionVat = round($tsProtectionVat, 1);
+            $pos = strpos($tsProtectionVat, '.');
+            $tsProtectionVat = substr($tsProtectionVat, 0, $pos+2);
             $item = [
                 'Description' => 'TS Protection Cost',
                 'ArticleNumber' => 'oxtsprotection',
                 'Quantity' => 1,
                 'UnitPriceGross' => $util->getFormattedNumber($tsProtectionCosts, '2', '.'),
-                'TaxRate' => $util->getFormattedNumber(ceil($tsProtectionVat), '2', '.'),
+                'TaxRate' => $util->getFormattedNumber($tsProtectionVat, '2', '.'),
             ];
 
             $shoppingBasket['Items'][] = ['Item' => $item];
