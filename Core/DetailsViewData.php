@@ -3,6 +3,7 @@
 namespace pi\ratepay\Core;
 
 use OxidEsales\Eshop\Core\Model\BaseModel;
+use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
 use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 
@@ -173,7 +174,7 @@ class DetailsViewData extends BaseModel
     {
         $aRow = $this->piGetOrderSpecialCostsQuery($ident);
 
-        if ($aRow['PRICE'] > 0) {
+        if (isset($aRow['PRICE']) && $aRow['PRICE'] > 0) {
             $listEntry['oxid'] = "";
             $listEntry['artid'] = $ident;
             $listEntry['arthash'] = md5($aRow['UNIQUE_ARTICLE_NUMBER']);
@@ -188,7 +189,7 @@ class DetailsViewData extends BaseModel
             $listEntry['returned'] = $aRow['RETURNED'];
             $listEntry['cancelled'] = $aRow['CANCELLED'];
             $listEntry['currency'] = $aRow['oxcurrency'];
-            $listEntry['unique_article_number'] = $aRow['unique_article_number'];
+            $listEntry['unique_article_number'] = $aRow['unique_article_number'] ?? '';
             $listEntry['description_addition'] = false;
 
             $blHasTotal = (
@@ -246,7 +247,7 @@ class DetailsViewData extends BaseModel
         $aRow = $oQueryBuilder->execute();
         $aRow = $aRow->fetchAllAssociative();
 
-        if ($aRow['PRICE'] != 0) {
+        if (isset($aRow['PRICE']) && $aRow['PRICE'] != 0) {
 
             $listEntry['oxid'] = "";
             $listEntry['artid'] = $aRow['ARTID'];
@@ -330,18 +331,35 @@ class DetailsViewData extends BaseModel
 
         $dTotalprice = 0;
 
+        $blIsNettoMode = false;
+        $dVoucherVat = Registry::getConfig()->getConfigParam('dDefaultVAT');
+        $aOrderValues = $this->piGetOrderValues();
+        if (count($aOrderValues) > 0) {
+            $sOrderCountryId = $aOrderValues[0]['OXBILLCOUNTRYID'];
+            $oOrderCountry = oxNew('oxcountry');
+            if ($oOrderCountry->load($sOrderCountryId)) {
+                if ($oOrderCountry->oxcountry__oxvatstatus->value == 0) {
+                    $dVoucherVat = 0;
+                };
+            }
+
+            $blIsNettoMode = (bool) $aOrderValues[0]['OXISNETTOMODE'];
+        }
+
         $dSum = 0;
         for ($i = 0; $i < count($aRows); $i++) {
             $aRow = $aRows[$i];
             if ($aRow['price'] != 0) {
+                $dPrice = $blIsNettoMode ? (float)$aRow['price'] : (float)$aRow['price'] / ((100+$dVoucherVat)/100);
+
                 $listEntry['oxid'] = "";
                 $listEntry['artid'] = $aRow['artnr'];
                 $listEntry['arthash'] = md5($aRow['artnr']);
                 $listEntry['artnum'] = 'voucher_' . $aRow['title'];
                 $listEntry['title'] = $aRow['seriesTitle'];
                 $listEntry['oxtitle'] = $aRow['seriesTitle'];
-                $listEntry['vat'] = "0";
-                $listEntry['unitprice'] = (float)$aRow['price'];
+                $listEntry['vat'] = $dVoucherVat;
+                $listEntry['unitprice'] = $dPrice;
                 $listEntry['amount'] = 1 - $aRow['SHIPPED'] - $aRow['CANCELLED'];
                 $listEntry['ordered'] = $aRow['ORDERED'];
                 $listEntry['shipped'] = $aRow['SHIPPED'];
@@ -357,16 +375,16 @@ class DetailsViewData extends BaseModel
 
                 if ($blHasTotal) {
                     $dTotal =
-                        (float)$aRow['price'] +
-                        ((float)$aRow['price'] *
-                            round((float)$aRow['VAT']) / 100);
+                        $dPrice +
+                        ($dPrice *
+                            round((float)$dVoucherVat) / 100);
 
                     $listEntry['totalprice'] = $dTotal;
                 } else {
                     $listEntry['totalprice'] = 0;
                 }
 
-                $dSum += (float)$aRow['price'];
+                $dSum += $dPrice;
                 $dTotalprice += $listEntry['totalprice'];
 
                 if ($blIsDisplayList === false && $blHasTotal && count($aRows) == ($i + 1) && $dSum != (float)$aRow['totaldiscount']) { // is last voucher
@@ -478,7 +496,7 @@ class DetailsViewData extends BaseModel
         $aRow = $oQueryBuilder->execute();
         $aRow = $aRow->fetchAllAssociative();
 
-        return $aRow[0];
+        return $aRow[0] ?? [];
     }
 
     /**

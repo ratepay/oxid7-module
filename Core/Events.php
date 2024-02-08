@@ -226,7 +226,7 @@ class Events
             self::insertRowIfNotExists('oxobject2payment', ['OXPAYMENTID' => $sPaymentOxid, 'OXTYPE' => 'oxdelset'], "INSERT INTO oxobject2payment(OXID,OXPAYMENTID,OXOBJECTID,OXTYPE) values (MD5(CONCAT(NOW(),RAND())), '{$sPaymentOxid}', 'oxidstandard', 'oxdelset');");
         }
 
-        self::insertRowIfNotExists('oxvoucherseries', ['OXID' => 'pi_ratepay_voucher'], "INSERT INTO `oxvoucherseries` (OXID,OXSHOPID,OXSERIENR,OXSERIEDESCRIPTION,OXDISCOUNT,OXDISCOUNTTYPE,OXBEGINDATE,OXENDDATE,OXALLOWSAMESERIES,OXALLOWOTHERSERIES,OXALLOWUSEANOTHER,OXMINIMUMVALUE,OXCALCULATEONCE,OXTIMESTAMP) VALUES ('pi_ratepay_voucher', 1, 'Ratepay Gutschrift-Platzhalter', 'Ratepay Gutschrift-Platzhalter', 0.00, 'absolute', '2010-01-01 00:00:01', '2099-01-01 00:00:01', 1, 1, 1, 0.00, 0, NOW());");
+        self::insertRowIfNotExists('oxvoucherseries', ['OXID' => 'pi_ratepay_voucher'], "INSERT INTO `oxvoucherseries` (OXID,OXSHOPID,OXSERIENR,OXSERIEDESCRIPTION,OXDISCOUNT,OXDISCOUNTTYPE,OXBEGINDATE,OXENDDATE,OXALLOWSAMESERIES,OXALLOWOTHERSERIES,OXALLOWUSEANOTHER,OXMINIMUMVALUE,OXCALCULATEONCE,OXTIMESTAMP) VALUES ('pi_ratepay_voucher', 1, 'Ratepay Gutschrift-Platzhalter - bitte nicht verwenden', 'Ratepay Gutschrift-Platzhalter - bitte nicht verwenden', 0.00, 'absolute', '2010-01-01 00:00:01', '2099-01-01 00:00:01', 1, 1, 1, 0.00, 0, NOW());");
     }
 
     /**

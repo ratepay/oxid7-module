@@ -734,6 +734,8 @@ class ModelFactory extends Base
             $phone = $this->getUser()->oxuser__oxmbfon->value;
         }
 
+        $oConfig = Registry::getConfig();
+        $blShowNetPrice = $oConfig->getConfigParam('blShowNetPrice');
         $contentArr = [
             'Customer' => [
                 'Gender' => $gender,
@@ -759,7 +761,7 @@ class ModelFactory extends Base
             'ShoppingBasket' => $basket,
             'Payment' => [
                 'Method' => strtolower($util->getPaymentMethod($this->_paymentType)),
-                'Amount' => $this->_basket->getPrice()->getBruttoPrice()
+                'Amount' => $blShowNetPrice ? $this->_basket->getPrice()->getNettoPrice(): $this->_basket->getPrice()->getBruttoPrice()
             ]
         ];
 
@@ -907,10 +909,20 @@ class ModelFactory extends Base
 
         $sDiscountTitle = trim($sDiscountTitle, '_');
 
+        $blShowNetPrice = Registry::getConfig()->getConfigParam('blShowNetPrice');
+        $dVat = Registry::getConfig()->getConfigParam('dDefaultVAT');
+
+        $oOrderCountry = oxNew('oxcountry');
+        if ($oOrderCountry->load($this->_countryId)) {
+            if ($oOrderCountry->oxcountry__oxvatstatus->value == 0) {
+                $dVat = 0;
+            };
+        }
+
         $discount = [
             'Description' => $sDiscountTitle,
-            'UnitPriceGross' => $basket->getTotalDiscountSum(),
-            'TaxRate' => $util->getFormattedNumber("0"),
+            'UnitPriceGross' => $blShowNetPrice ? $basket->getTotalDiscountSum() * ((100+$dVat)/100) : $basket->getTotalDiscountSum(),
+            'TaxRate' => $util->getFormattedNumber($dVat),
         ];
 
         return $discount;
