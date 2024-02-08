@@ -167,8 +167,8 @@ class RatepayModuleConfig extends RatepayModuleConfig_parent
 
         $blValid = (
             $blActive &&
-            !empty($sProfileId) &&
-            !empty($sSecurityCode)
+            !empty($sProfileId->toString()) &&
+            !empty($sSecurityCode->toString())
         );
         if (!$blValid) return false;
         $modelFactory = oxNew(ModelFactory::class);
