@@ -1139,6 +1139,24 @@ class ModelFactory extends Base
      */
     private function getSpecialBasket()
     {
+        $oOrder = oxNew(Order::class);
+        $oOrder->load($this->_orderId);
+        $blIsNettoMode = false;
+        $dVoucherVat = Registry::getConfig()->getConfigParam('dDefaultVAT');
+        $aOrderValues = $this->piGetOrderValues();
+        if (count($aOrderValues) > 0) {
+            $sOrderCountryId = $aOrderValues[0]['OXBILLCOUNTRYID'];
+            $oOrderCountry = oxNew('oxcountry');
+            if ($oOrderCountry->load($sOrderCountryId)) {
+                if ($oOrderCountry->oxcountry__oxvatstatus->value == 0) {
+                    $dVoucherVat = 0;
+                };
+            }
+
+            $blIsNettoMode = (bool) $aOrderValues[0]['OXISNETTOMODE'];
+        }
+
+
         $shoppingBasket = [];
         $artnr = [];
 
@@ -1185,12 +1203,12 @@ class ModelFactory extends Base
                         $article['oxtitle'] = $article['title'];
                     }
                     if (!empty($shoppingBasket['Discount']['UnitPriceGross'])) {
-                        $article['unitprice'] = $article['unitprice'] + $shoppingBasket['Discount']['UnitPriceGross'];
+                        $article['totalprice'] = $article['totalprice'] + $shoppingBasket['Discount']['UnitPriceGross'];
                         $article['oxtitle'] = $shoppingBasket['Discount']['Description'] . '_' . $article['oxtitle'];
                     }
                     $shoppingBasket['Discount'] = [
                         'Description' => $article['oxtitle'],
-                        'UnitPriceGross' => $article['unitprice'],
+                        'UnitPriceGross' => $article['totalprice'] ?? number_format($article['unitprice'] + ($article['unitprice'] / 100 * $article['vat']), '2', '.', ''),
                         'TaxRate' => $article['vat'],
                     ];
                     continue;
@@ -1227,8 +1245,6 @@ class ModelFactory extends Base
             $shoppingBasket['Items'][] = ['Item' => $item];
         }
 
-        $oOrder = oxNew(Order::class);
-        $oOrder->load($this->_orderId);
         $oCurrency = $oOrder->getOrderCurrency();
         $shoppingBasket['Currency'] = $oCurrency->name;
 
@@ -1485,5 +1501,27 @@ class ModelFactory extends Base
         }
 
         return $this->_orderNumber;
+    }
+
+    /**
+     * Returns order informations
+     *
+     * @return array|null
+     */
+    protected function piGetOrderValues()
+    {
+        $orderId = $this->_orderId;
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oQueryBuilder
+            ->select('*')
+            ->from('oxorder')
+            ->where('OXID = :oxid')
+            ->setParameter(':oxid', $orderId);
+        $aOrders = $oQueryBuilder->execute();
+
+        return $aOrders->fetchAllAssociative();
     }
 }
