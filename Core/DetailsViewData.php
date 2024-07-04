@@ -387,7 +387,7 @@ class DetailsViewData extends BaseModel
                 $dSum += $dPrice;
                 $dTotalprice += $listEntry['totalprice'];
 
-                if ($blIsDisplayList === false && $blHasTotal && count($aRows) == ($i + 1) && $dSum != (float)$aRow['totaldiscount']) { // is last voucher
+                if ($blIsNettoMode && $blIsDisplayList === false && $blHasTotal && count($aRows) == ($i + 1) && $dSum != (float)$aRow['totaldiscount']) { // is last voucher
                     // compensation for rounding discrepancies
                     $dDiff = (float)$dTotalprice - $dSum;
                     $listEntry['unitprice'] += $dDiff;
@@ -437,6 +437,8 @@ class DetailsViewData extends BaseModel
         $aRows = $oQueryBuilder->execute();
         $aRows = $aRows->fetchAllAssociative();
 
+        $creditVat = isset($aRow['VAT']) ? (float) $aRow['VAT'] : 0;
+
         foreach ($aRows as $aRow) {
             if ($aRow['price'] != 0) {
                 $listEntry['oxid'] = "";
@@ -445,7 +447,7 @@ class DetailsViewData extends BaseModel
                 $listEntry['artnum'] = 'voucher_' . $aRow['title'];
                 $listEntry['title'] = $aRow['title'];
                 $listEntry['oxtitle'] = $aRow['title'];
-                $listEntry['vat'] = "0";
+                $listEntry['vat'] = $creditVat;
                 $listEntry['unitprice'] = (float)$aRow['price'];
                 $listEntry['amount'] = 1 - $aRow['SHIPPED'] - $aRow['CANCELLED'];
                 $listEntry['ordered'] = $aRow['ORDERED'];
@@ -457,7 +459,7 @@ class DetailsViewData extends BaseModel
                 $listEntry['description_addition'] = false;
 
                 if (($aRow['ORDERED'] - $aRow['RETURNED'] - $aRow['CANCELLED']) > 0) {
-                    $listEntry['totalprice'] = (float)$aRow['price'] + ((float)$aRow['price'] * round((float)$aRow['VAT']) / 100);;
+                    $listEntry['totalprice'] = (float)$aRow['price'] + ((float)$aRow['price'] * round($creditVat) / 100);
                 } else {
                     $listEntry['totalprice'] = 0;
                 }
