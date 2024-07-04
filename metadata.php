@@ -25,7 +25,7 @@ $aModule = [
     ],
     'thumbnail' => 'ratepay_logo.png',
     'lang' => 'en',
-    'version' => '1.0.0',
+    'version' => '1.0.1',
     'author' => 'Ratepay GmbH',
     'email' => 'integration@ratepay.com',
     'url' => 'https://www.ratepay.com/',
