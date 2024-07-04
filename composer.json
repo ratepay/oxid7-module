@@ -9,7 +9,7 @@
     "payment"
   ],
   "homepage": "https://www.ratepay.com/",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "MIT",
   "extra": {
     "oxideshop": {
