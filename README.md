@@ -5,7 +5,7 @@
 |------|----------
 |Author | `Fatchip GmbH`
 |Prefix | `pi`
-|Shop Version | `CE/PE` `CE/PE/EE` `7.0.x`
+|Shop Version | `CE/PE` `CE/PE/EE` `7.0.x-7.4.x`
 |Version | `1.0.2`
 |Link | http://www.ratepay.com
 |Mail | integration@ratepay.com
