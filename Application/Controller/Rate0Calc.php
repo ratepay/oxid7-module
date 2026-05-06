@@ -27,8 +27,8 @@ class Rate0Calc extends FrontendController
      *
      * Also adds template variable 'piTotalAmount' (brutto price, rounded).
      *
-     * @return string
      * @see FrontendController::render()
+     * @return string
      */
     public function render()
     {

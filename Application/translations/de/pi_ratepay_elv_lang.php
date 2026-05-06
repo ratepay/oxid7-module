@@ -7,6 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 // -------------------------------
 // RESOURCE IDENTITFIER = STRING
 // -------------------------------
@@ -21,6 +22,7 @@ $piErrorBirthdayDigits = 'Geben Sie bitte Ihr Geburtsjahr vierstellig ein. (z.B.
 $aLang = [
     'charset'                                       => 'UTF-8',
     'PI_RATEPAY_ELV_VIEW_SANDBOX_NOTIFICATION'      => 'Testmodus aktiviert, bitte nutzen Sie diese Zahlart NICHT f&uuml;r die Bestellung und informieren den H&auml;ndler &uuml;ber diese Nachricht.',
+    'PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION'    => 'Mandatsreferenz und Gläubiger-ID wird Ihnen separat mitgeteilt.',
     'PI_RATEPAY_ELV_VIEW_CREDITOR_ID_TEXT'          => 'Gl&auml;ubiger-ID',
     'PI_RATEPAY_ELV_VIEW_CREDITOR_ID_VALUE'         => 'DE39RPY00000568463',
     'PI_RATEPAY_ELV_VIEW_MANDATE_TEXT'              => 'Mandatsreferenz',
