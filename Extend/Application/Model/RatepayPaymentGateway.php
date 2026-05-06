@@ -83,7 +83,7 @@ class RatepayPaymentGateway extends RatepayPaymentGateway_parent
      */
     protected function isRatePayPayment($oOrder)
     {
-        if (in_array($oOrder->oxorder__oxpaymenttype->value, Utilities::$_RATEPAY_PAYMENT_METHOD)) {
+        if (in_array($oOrder->getFieldData('oxpaymenttype'), Utilities::$_RATEPAY_PAYMENT_METHOD)) {
             return true;
         }
         return false;
@@ -122,13 +122,13 @@ class RatepayPaymentGateway extends RatepayPaymentGateway_parent
      */
     protected function handleRatePayPayment($oOrder, $dAmount)
     {
-        $this->_paymentId = $oOrder->oxorder__oxpaymenttype->value;
+        $this->_paymentId = $oOrder->getFieldData('oxpaymenttype');
         $isSandbox = $this->isSandbox($this->_paymentId);
 
         $modelFactory = oxNew(ModelFactory::class);
         $modelFactory->setPaymentType($this->_paymentId);
         $modelFactory->setSandbox($isSandbox);
-        $modelFactory->setCountryId($this->getUser()->oxuser__oxcountryid->value);
+        $modelFactory->setCountryId($this->getUser()->getFieldData('oxcountryid'));
         $modelFactory->setShopId(Registry::getSession()->getVariable('shopId'));
 
         $payInit = $modelFactory->doOperation('PAYMENT_INIT');
@@ -144,7 +144,7 @@ class RatepayPaymentGateway extends RatepayPaymentGateway_parent
         Registry::getSession()->setVariable($this->_paymentId . '_trans_id', $transactionId);
 
         $modelFactory->setTransactionId($transactionId);
-        $modelFactory->setCustomerId($this->getUser()->oxuser__oxcustnr->value);
+        $modelFactory->setCustomerId($this->getUser()->getFieldData('oxcustnr'));
         $modelFactory->setDeviceToken(Registry::getSession()->getVariable('pi_ratepay_dfp_token'));
         $modelFactory->setBasket(Registry::getSession()->getBasket());
         $modelFactory->setOrder($oOrder);
@@ -171,10 +171,10 @@ class RatepayPaymentGateway extends RatepayPaymentGateway_parent
 
                 /** @var User $user */
                 $user = oxNew(User::class);
-                $userId = $oOrder->oxorder__oxuserid->value;
+                $userId = $oOrder->getFieldData('oxuserid');
                 $user->load($userId);
-                if ($user->oxuser__oxregister->value == '0000-00-00 00:00:00') {
-                    $userId = $user->oxuser__oxusername->value;
+                if ($user->getFieldData('oxregister') == '0000-00-00 00:00:00') {
+                    $userId = $user->getFieldData('oxusername');
                 }
 
                 /** @var PaymentBan $paymentBan */

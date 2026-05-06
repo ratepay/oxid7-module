@@ -351,25 +351,18 @@ class ModelFactory extends Base
         switch ($operation) {
             case 'PAYMENT_INIT':
                 return $this->makePaymentInit();
-                break;
             case 'PAYMENT_REQUEST':
                 return $this->makePaymentRequest();
-                break;
             case 'PAYMENT_CONFIRM':
                 return $this->makePaymentConfirm();
-                break;
             case 'CONFIRMATION_DELIVER':
                 return $this->makeConfirmationDeliver();
-                break;
             case 'PAYMENT_CHANGE':
                 return $this->makePaymentChange();
-                break;
             case 'PROFILE_REQUEST':
                 return $this->makeProfileRequest();
-                break;
             case 'CALCULATION_REQUEST':
                 return $this->makeCalculationRequest();
-                break;
         }
     }
 
@@ -396,9 +389,6 @@ class ModelFactory extends Base
      */
     private function makePaymentConfirm()
     {
-        $util = oxNew(Utilities::class);
-        $paymentMethod = $util->getPaymentMethod($this->_paymentType);
-
         $confirm = $this->getConfirmSettings();
         if ($confirm == 0) {
             return true;
@@ -544,7 +534,7 @@ class ModelFactory extends Base
     {
         if (empty($this->_countryId)) { // might be set already, for example by getOrderCountryId()
             $oUser = $this->getUser();
-            $this->_countryId = $oUser->oxuser__oxcountryid->value;
+            $this->_countryId = $oUser->getFieldData('oxcountryid');
         }
     }
 
@@ -697,8 +687,8 @@ class ModelFactory extends Base
             $this->_paymentType,
             'PAYMENT_INIT',
             '',
-            $this->getUser()->oxuser__oxfname->value,
-            $this->getUser()->oxuser__oxlname->value,
+            $this->getUser()->getFieldData('oxfname'),
+            $this->getUser()->getFieldData('oxlname'),
             $paymentInit
         );
         return $paymentInit;
@@ -739,10 +729,10 @@ class ModelFactory extends Base
         $contentArr = [
             'Customer' => [
                 'Gender' => $gender,
-                'FirstName' => $this->getUser()->oxuser__oxfname->value,
-                'LastName' => $this->getUser()->oxuser__oxlname->value,
-                'DateOfBirth' => $this->getUser()->oxuser__oxbirthdate->value,
-                'IpAddress' => "127.0.0.1",
+                'FirstName' => $this->getUser()->getFieldData('oxfname'),
+                'LastName' => $this->getUser()->getFieldData('oxlname'),
+                'DateOfBirth' => $this->getUser()->getFieldData('oxbirthdate'),
+                'IpAddress' => $this->getRemoteAddress(),
                 'Addresses' => [
                     [
                         'Address' => $this->getCustomerAddress()
@@ -752,7 +742,7 @@ class ModelFactory extends Base
                     ]
                 ],
                 'Contacts' => [
-                    'Email' => $this->getUser()->oxuser__oxusername->value,
+                    'Email' => $this->getUser()->getFieldData('oxusername'),
                     'Phone' => [
                         'DirectDial' => !empty($phone) ? $phone : '03033988560'
                     ],
@@ -765,9 +755,9 @@ class ModelFactory extends Base
             ]
         ];
 
-        if (!empty($this->getUser()->oxuser__oxcompany->value)) {
-            $contentArr['Customer']['CompanyName'] = $this->getUser()->oxuser__oxcompany->value;
-            $contentArr['Customer']['VatId'] = $this->getUser()->oxuser__oxustid->value;
+        if (!empty($this->getUser()->getFieldData('oxcompany'))) {
+            $contentArr['Customer']['CompanyName'] = $this->getUser()->getFieldData('oxcompany');
+            $contentArr['Customer']['VatId'] = $this->getUser()->getFieldData('oxustid');
         }
 
         if ($util->getPaymentMethod($this->_paymentType) == 'ELV') {
@@ -829,8 +819,8 @@ class ModelFactory extends Base
             $this->_paymentType,
             'PAYMENT_REQUEST',
             '',
-            $this->getUser()->oxuser__oxfname->value,
-            $this->getUser()->oxuser__oxlname->value,
+            $this->getUser()->getFieldData('oxfname'),
+            $this->getUser()->getFieldData('oxlname'),
             $paymentRequest
         );
         return $paymentRequest;
@@ -865,9 +855,9 @@ class ModelFactory extends Base
             return false;
         }
         $shipping = [
-            'Description' => 'Shipping Costs',
-            'UnitPriceGross' => $deliveryCosts,
-            'TaxRate' => $deliveryVat,
+            'Description'       => 'Shipping Costs',
+            'UnitPriceGross'    => $deliveryCosts,
+            'TaxRate'           => $deliveryVat,
         ];
 
         return $shipping;
@@ -920,9 +910,9 @@ class ModelFactory extends Base
         }
 
         $discount = [
-            'Description' => $sDiscountTitle,
-            'UnitPriceGross' => $blShowNetPrice ? $basket->getTotalDiscountSum() * ((100+$dVat)/100) : $basket->getTotalDiscountSum(),
-            'TaxRate' => $util->getFormattedNumber($dVat),
+            'Description'       => $sDiscountTitle,
+            'UnitPriceGross'    => $blShowNetPrice ? $basket->getTotalDiscountSum() * ((100+$dVat)/100) : $basket->getTotalDiscountSum(),
+            'TaxRate'           => $util->getFormattedNumber($dVat),
         ];
 
         return $discount;
@@ -1033,7 +1023,7 @@ class ModelFactory extends Base
 
         if ($bankDataType == 'classic') {
             $bankData['BankAccountNumber'] = $bankAccountNumber;
-            $bankData['BankCode'] = $bankCode;
+            $bankData['BankCode']          = $bankCode;
         } else {
             $bankData['Iban'] = $bankIban;
         }
@@ -1043,10 +1033,10 @@ class ModelFactory extends Base
             $bankData['Owner'] = Registry::getSession()->getVariable($paymentType . 'elv_bank_owner');
         } else {
             if (!empty($elvUseCompany) && $elvUseCompany == 1) {
-                $bankData['Owner'] = $this->getUser()->oxuser__oxcompany->value;
+                $bankData['Owner'] = $this->getUser()->getFieldData('oxcompany');
             } else {
-                $bankData['Owner'] = $this->getUser()->oxuser__oxfname->value . ' ' . $this->getUser(
-                    )->oxuser__oxlname->value;
+                $bankData['Owner'] = $this->getUser()->getFieldData('oxfname') . ' ' .
+                    $this->getUser()->getFieldData('oxlname');
             }
         }
 
@@ -1073,12 +1063,12 @@ class ModelFactory extends Base
         $sCountryCode = $sCountryCode->fetchOne();
 
         $address = [
-            'Type' => 'billing',
-            'Street' => $this->getUser()->oxuser__oxstreet->value,
-            'StreetNumber' => $this->getUser()->oxuser__oxstreetnr->value,
-            'ZipCode' => $this->getUser()->oxuser__oxzip->value,
-            'City' => $this->getUser()->oxuser__oxcity->value,
-            'CountryCode' => $sCountryCode
+            'Type'              => 'billing',
+            'Street'            => $this->getUser()->getFieldData('oxstreet'),
+            'StreetNumber'      => $this->getUser()->getFieldData('oxstreetnr'),
+            'ZipCode'           => $this->getUser()->getFieldData('oxzip'),
+            'City'              => $this->getUser()->getFieldData('oxcity'),
+            'CountryCode'       => $sCountryCode
         ];
 
         return $address;
@@ -1101,8 +1091,8 @@ class ModelFactory extends Base
         if (is_null($deliveryAddress)) {
             $address = $this->getCustomerAddress();
             $address['Type'] = 'delivery';
-            $address['FirstName'] = $this->getUser()->oxuser__oxfname->value;
-            $address['LastName'] = $this->getUser()->oxuser__oxlname->value;
+            $address['FirstName'] = $this->getUser()->getFieldData('oxfname');
+            $address['LastName'] = $this->getUser()->getFieldData('oxlname');
             return $address;
         }
 
@@ -1115,18 +1105,18 @@ class ModelFactory extends Base
         $sCountryCode = $sCountryCode->fetchOne();
 
         $address = [
-            'Type' => 'delivery',
-            'FirstName' => $deliveryAddress->oxaddress__oxfname->value,
-            'LastName' => $deliveryAddress->oxaddress__oxlname->value,
-            'Street' => $deliveryAddress->oxaddress__oxstreet->value,
-            'StreetNumber' => $deliveryAddress->oxaddress__oxstreetnr->value,
-            'ZipCode' => $deliveryAddress->oxaddress__oxzip->value,
-            'City' => $deliveryAddress->oxaddress__oxcity->value,
-            'CountryCode' => $sCountryCode
+            'Type'         => 'delivery',
+            'FirstName'    => $deliveryAddress->getFieldData('oxfname'),
+            'LastName'     => $deliveryAddress->getFieldData('oxlname'),
+            'Street'       => $deliveryAddress->getFieldData('oxstreet'),
+            'StreetNumber' => $deliveryAddress->getFieldData('oxstreetnr'),
+            'ZipCode'      => $deliveryAddress->getFieldData('oxzip'),
+            'City'         => $deliveryAddress->getFieldData('oxcity'),
+            'CountryCode'  => $sCountryCode
         ];
 
-        if (!empty($deliveryAddress->oxaddress__oxcompany->value)) {
-            $address['Company'] = $deliveryAddress->oxaddress__oxcompany->value;
+        if (!empty($deliveryAddress->getFieldData('oxcompany'))) {
+            $address['Company'] = $deliveryAddress->getFieldData('oxcompany');
         }
 
         return $address;
@@ -1148,7 +1138,7 @@ class ModelFactory extends Base
             $sOrderCountryId = $aOrderValues[0]['OXBILLCOUNTRYID'];
             $oOrderCountry = oxNew('oxcountry');
             if ($oOrderCountry->load($sOrderCountryId)) {
-                if ($oOrderCountry->oxcountry__oxvatstatus->value == 0) {
+                if ($oOrderCountry->getFieldData('oxvatstatus') == 0) {
                     $dVoucherVat = 0;
                 };
             }
@@ -1290,11 +1280,11 @@ class ModelFactory extends Base
 
         foreach ($this->_order->getOrderArticles() as $article) {
             $item = [
-                'Description' => $article->oxorderarticles__oxtitle->value,
-                'ArticleNumber' => $article->oxorderarticles__oxartnum->value,
-                'Quantity' => $article->oxorderarticles__oxamount->value,
-                'UnitPriceGross' => $article->oxorderarticles__oxbprice->value,
-                'TaxRate' => $article->oxorderarticles__oxvat->value,
+                'Description' => $article->getFieldData('oxtitle'),
+                'ArticleNumber' => $article->getFieldData('oxartnum'),
+                'Quantity' => $article->getFieldData('oxamount'),
+                'UnitPriceGross' => $article->getFieldData('oxbprice'),
+                'TaxRate' => $article->getFieldData('oxvat'),
                 'UniqueArticleNumber' => $article->getId(),
             ];
 
@@ -1504,7 +1494,7 @@ class ModelFactory extends Base
     }
 
     /**
-     * Returns order informations
+     * Returns order information
      *
      * @return array|null
      */
@@ -1523,5 +1513,34 @@ class ModelFactory extends Base
         $aOrders = $oQueryBuilder->execute();
 
         return $aOrders->fetchAllAssociative();
+    }
+
+    /**
+     * Returns the Remote IP supporting
+     * load balancer and proxy setups
+     *
+     * @return string
+     */
+    private function getRemoteAddress()
+    {
+        $remoteAddr = $_SERVER['REMOTE_ADDR'];
+        if (array_key_exists('HTTP_X_FORWARDED_FOR', $_SERVER)) {
+            $proxy = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            if (!empty($proxy)) {
+                $proxyIps = explode(',', $proxy);
+                $relevantIp = array_shift($proxyIps);
+                $relevantIp = trim($relevantIp);
+                if (!empty($relevantIp)) {
+                    return $relevantIp;
+                }
+            }
+        }
+        // Cloudflare sends a special Proxy Header, see:
+        // https://support.cloudflare.com/hc/en-us/articles/200170986-How-does-Cloudflare-handle-HTTP-Request-headers-
+        // In theory, CF should respect X-Forwarded-For, but in some instances this failed
+        if (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+            return $_SERVER['HTTP_CF_CONNECTING_IP'];
+        }
+        return $remoteAddr;
     }
 }

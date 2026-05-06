@@ -291,7 +291,7 @@ class Events
     {
         $aTables = DatabaseProvider::getDb()->getAll("SHOW TABLES LIKE '{$sTableName}'");
         if (!$aTables || count($aTables) == 0) {
-            DatabaseProvider::getDb()->Execute($sQuery);
+            DatabaseProvider::getDb()->execute($sQuery);
             return true;
         }
         return false;
@@ -305,7 +305,7 @@ class Events
      */
     public static function dropTable($sTableName)
     {
-        DatabaseProvider::getDb()->Execute("DROP TABLE IF EXISTS `{$sTableName}`;");
+        DatabaseProvider::getDb()->execute("DROP TABLE IF EXISTS `{$sTableName}`;");
     }
 
     /**
@@ -337,9 +337,8 @@ class Events
     {
         if (self::checkIfColumnExists($sTableName, $sColumnName) === false) {
             try {
-                DatabaseProvider::getDb()->Execute($sQuery);
-            } catch (\Exception $e) {
-            }
+                DatabaseProvider::getDb()->execute($sQuery);
+            } catch (\Exception $e) {}
             return true;
         }
         return false;
@@ -358,9 +357,8 @@ class Events
     {
         if (self::checkIfColumnExists($sTableName, $sColumnName) === true) {
             try {
-                DatabaseProvider::getDb()->Execute($sQuery);
-            } catch (\Exception $e) {
-            }
+                DatabaseProvider::getDb()->execute($sQuery);
+            } catch (\Exception $e) {}
             return true;
         }
         return false;
@@ -377,9 +375,8 @@ class Events
     {
         if (self::checkIfColumnExists($sTableName, $sColumnName) === true) {
             try {
-                DatabaseProvider::getDb()->Execute("ALTER TABLE `{$sTableName}` DROP `{$sColumnName}`;");
-            } catch (\Exception $e) {
-            }
+                DatabaseProvider::getDb()->execute("ALTER TABLE `{$sTableName}` DROP `{$sColumnName}`;");
+            } catch (\Exception $e) {}
             return true;
         }
         return false;
@@ -402,7 +399,7 @@ class Events
                           AND column_name = "' . $sColumnName . '";';
         $sCurrentCharset = DatabaseProvider::getDb()->getOne($sCheckQuery);
         if ($sCurrentCharset != $sNeededCharset) {
-            DatabaseProvider::getDb()->Execute($sQuery);
+            DatabaseProvider::getDb()->execute($sQuery);
         }
     }
 
@@ -441,8 +438,8 @@ class Events
     public static function deactivePaymethods()
     {
         $sPaymenthodIds = "'" . implode("','", array_keys(self::$aPaymentMethods)) . "'";
-        $sQ = "update oxpayments set oxactive = 0 where oxid in ($sPaymenthodIds)";
-        DatabaseProvider::getDB()->Execute($sQ);
+        $sQ = "UPDATE oxpayments SET oxactive = 0 WHERE oxid IN ($sPaymenthodIds)";
+        DatabaseProvider::getDB()->execute($sQ);
     }
 
     /**
@@ -479,7 +476,6 @@ class Events
      * @param array  $aKeyValue   keys of rows to change
      * @param string $sColumnName the column name to change, used also to existence check
      * @param string $sValue
-     *
      * @param        $aCriteria
      * @return bool
      */
@@ -498,7 +494,7 @@ class Events
         }
         $sQ = "UPDATE {$sTableName} SET {$sColumnName} = '{$sValue}' WHERE 1" . $sWhere;
         try {
-            DatabaseProvider::getDB()->Execute($sQ);
+            DatabaseProvider::getDB()->execute($sQ);
         } catch (\Exception $oEx) {
             return false;
         }

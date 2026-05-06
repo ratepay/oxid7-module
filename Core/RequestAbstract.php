@@ -27,7 +27,7 @@ abstract class RequestAbstract extends Base
      */
     public function getCustomerNumber()
     {
-        return $this->getUser()->oxuser__oxcustnr->value;
+        return $this->getUser()->getFieldData('oxcustnr');
     }
 
     /**
@@ -36,7 +36,7 @@ abstract class RequestAbstract extends Base
      */
     public function getCustomerFax()
     {
-        $fax = empty($this->getUser()->oxuser__oxfax->value) ? false : $this->getUser()->oxuser__oxfax->value;
+        $fax = empty($this->getUser()->getFieldData('oxfax')) ? false : $this->getUser()->getFieldData('oxfax');
 
         return $fax;
     }
@@ -47,7 +47,7 @@ abstract class RequestAbstract extends Base
      */
     public function getCustomerMobilePhone()
     {
-        $mobilePhone = empty($this->getUser()->oxuser__oxmobfon->value) ? false : $this->getUser()->oxuser__oxmobfon->value;
+        $mobilePhone = empty($this->getUser()->getFieldData('oxmobfon')) ? false : $this->getUser()->getFieldData('oxmobfon');
 
         return $mobilePhone;
     }
@@ -60,11 +60,11 @@ abstract class RequestAbstract extends Base
     {
         $phone = false;
 
-        if (!empty($this->getUser()->oxuser__oxfon->value) || !empty($this->getUser()->oxuser__oxprivfon->value)) {
-            if (!empty($this->getUser()->oxuser__oxfon->value)) {
-                $phone = $this->getUser()->oxuser__oxfon->value;
+        if (!empty($this->getUser()->getFieldData('oxfon')) || !empty($this->getUser()->getFieldData('oxprivfon'))) {
+            if (!empty($this->getUser()->getFieldData('oxfon'))) {
+                $phone = $this->getUser()->getFieldData('oxfon');
             } else {
-                $phone = $this->getUser()->oxuser__oxprivfon->value;
+                $phone = $this->getUser()->getFieldData('oxprivfon');
             }
         }
 
@@ -86,17 +86,17 @@ abstract class RequestAbstract extends Base
             ->select('OXISOALPHA2')
             ->from('oxcountry')
             ->where('OXID = :oxid')
-            ->setParameter(':oxid', $this->getUser()->oxuser__oxcountryid->value);
+            ->setParameter(':oxid', $this->getUser()->getFieldData('oxcountryid'));
         $sCountryCode = $oQueryBuilder->execute();
         $sCountryCode = $sCountryCode->fetchOne();
 
         $address = [
-            'street'            => $this->getUser()->oxuser__oxstreet->value,
-            'street-additional' => $this->getUser()->oxuser__oxaddinfo->value,
-            'street-number'     => $this->getUser()->oxuser__oxstreetnr->value,
-            'zip-code'      => $this->getUser()->oxuser__oxzip->value,
-            'city'          => $this->getUser()->oxuser__oxcity->value,
-            'country-code'  => $sCountryCode
+            'street'            => $this->getUser()->getFieldData('oxstreet'),
+            'street-additional' => $this->getUser()->getFieldData('oxaddinfo'),
+            'street-number'     => $this->getUser()->getFieldData('oxstreetnr'),
+            'zip-code'          => $this->getUser()->getFieldData('oxzip'),
+            'city'              => $this->getUser()->getFieldData('oxcity'),
+            'country-code'      => $sCountryCode,
         ];
 
         return $address;
@@ -104,7 +104,7 @@ abstract class RequestAbstract extends Base
 
     /**
      * Get complete delivery address.
-     * @return array
+     * @return array|false
      */
     public function getDeliveryAddress()
     {
@@ -123,19 +123,19 @@ abstract class RequestAbstract extends Base
             ->select('OXISOALPHA2')
             ->from('oxcountry')
             ->where('OXID = :oxid')
-            ->setParameter(':oxid', $deliveryAddress->oxaddress__oxcountryid->value);
+            ->setParameter(':oxid', $deliveryAddress->getFieldData('oxcountryid'));
         $sCountryCode = $oQueryBuilder->execute();
         $sCountryCode = $sCountryCode->fetchOne();
 
         $address = [
-            'first-name'    => $deliveryAddress->oxaddress__oxfname->value,
-            'last-name'     => $deliveryAddress->oxaddress__oxlname->value,
-            'company'       => $deliveryAddress->oxaddress__oxcompany->value,
-            'street'        => $deliveryAddress->oxaddress__oxstreet->value,
-            'street-number' => $deliveryAddress->oxaddress__oxstreetnr->value,
-            'zip-code'      => $deliveryAddress->oxaddress__oxzip->value,
-            'city'          => $deliveryAddress->oxaddress__oxcity->value,
-            'country-code'  => $sCountryCode
+            'first-name'    => $deliveryAddress->getFieldData('oxfname'),
+            'last-name'     => $deliveryAddress->getFieldData('oxlname'),
+            'company'       => $deliveryAddress->getFieldData('oxcompany'),
+            'street'        => $deliveryAddress->getFieldData('oxstreet'),
+            'street-number' => $deliveryAddress->getFieldData('oxstreetnr'),
+            'zip-code'      => $deliveryAddress->getFieldData('oxzip'),
+            'city'          => $deliveryAddress->getFieldData('oxcity'),
+            'country-code'  => $sCountryCode,
         ];
 
         return $address;
@@ -143,14 +143,14 @@ abstract class RequestAbstract extends Base
 
     /**
      * Get company name of customer, or false if customer has none.
-     * @return string|boolean
+     * @return string|false
      */
     public function getCustomerCompanyName()
     {
         $company = false;
 
-        if ($this->getUser()->oxuser__oxcompany->value != '' && $this->getUser()->oxuser__oxustid->value != '') {
-            $company = $this->getUser()->oxuser__oxcompany->value;
+        if ($this->getUser()->getFieldData('oxcompany') != '' && $this->getUser()->getFieldData('oxustid') != '') {
+            $company = $this->getUser()->getFieldData('oxcompany');
         }
 
         return $company;
@@ -162,7 +162,7 @@ abstract class RequestAbstract extends Base
      */
     public function getCustomerDateOfBirth()
     {
-        return $this->getUser()->oxuser__oxbirthdate->value;
+        return $this->getUser()->getFieldData('oxbirthdate');
     }
 
     /**
@@ -171,7 +171,7 @@ abstract class RequestAbstract extends Base
      */
     public function getCustomerFirstName()
     {
-        return $this->getUser()->oxuser__oxfname->value;
+        return $this->getUser()->getFieldData('oxfname');
     }
 
     /**
@@ -180,7 +180,7 @@ abstract class RequestAbstract extends Base
      */
     public function getCustomerLastName()
     {
-        return $this->getUser()->oxuser__oxlname->value;
+        return $this->getUser()->getFieldData('oxlname');
     }
 
     /**
@@ -205,14 +205,15 @@ abstract class RequestAbstract extends Base
 
     /**
      * Get vat id of customers company, or false if customer has none.
-     * @return string|boolean
+     * @return string|false
      */
     public function getCustomerVatId()
     {
         $vatId = false;
 
-        if ($this->getUser()->oxuser__oxcompany->value != '' && $this->getUser()->oxuser__oxustid->value != '') {
-            $vatId = $this->getUser()->oxuser__oxustid->value;
+        if ($this->getUser()->getFieldData('oxcompany') != '' &&
+            $this->getUser()->getFieldData('oxustid') != '') {
+            $vatId = $this->getUser()->getFieldData('oxustid');
         }
 
         return $vatId;
@@ -224,7 +225,7 @@ abstract class RequestAbstract extends Base
      */
     public function getCustomerEmail()
     {
-        return $this->getUser()->oxuser__oxusername->value;
+        return $this->getUser()->getFieldData('oxusername');
     }
 
     /**
@@ -257,7 +258,7 @@ abstract class RequestAbstract extends Base
      */
     public function getGender()
     {
-        $salutation = strtoupper($this->getUser()->oxuser__oxsal->value);
+        $salutation = strtoupper($this->getUser()->getFieldData('oxsal'));
         switch ($salutation) {
             default:
                 $gender = 'U';
@@ -282,7 +283,7 @@ abstract class RequestAbstract extends Base
             $owner = Registry::getSession()->getVariable($paymentType . 'elv_bank_owner');
         } else {
             if (!empty($elvUseCompany) && $elvUseCompany == 1) {
-                $owner = $this->getUser()->oxuser__oxcompany->value;
+                $owner = $this->getUser()->getFieldData('oxcompany');
             } else {
                 $owner = $this->getCustomerFirstName() . ' ' . $this->getCustomerLastName();
             }

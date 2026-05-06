@@ -1,5 +1,13 @@
 <?php
 
+/**
+ *
+ * Copyright (c) Ratepay GmbH
+ *
+ *For the full copyright and license information, please view the LICENSE
+ *file that was distributed with this source code.
+ */
+
 namespace pi\ratepay\Application\Controller\Admin;
 
 use OxidEsales\Eshop\Application\Controller\Admin\AdminDetailsController;
@@ -21,14 +29,6 @@ use pi\ratepay\Core\Orders;
 use pi\ratepay\Core\RateDetails;
 use pi\ratepay\Core\RequestDataBackend;
 use pi\ratepay\Core\Utilities;
-
-/**
- *
- * Copyright (c) Ratepay GmbH
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
 
 /**
  * RatePay order admin panel
@@ -108,8 +108,8 @@ class Details extends AdminDetailsController
      * Preparing all necessary Data for rendering and executing all calls
      * also: {@inheritdoc}
      *
-     * @return string
      * @see AdminDetailsController::render()
+     * @return string
      */
     public function render()
     {
@@ -402,11 +402,11 @@ class Details extends AdminDetailsController
         $vouchertitel = "pi-Merchant-Voucher-" . $sNr;
 
         $articles[] = [
-            'title' => 'Credit',
-            'artnum' => $vouchertitel,
+            'title'     => 'Credit',
+            'artnum'    => $vouchertitel,
             'unitprice' => "-" . $this->getFormattedNumber($this->piRatepayVoucher),
-            'arthash' => 1,
-            'vat' => 0,
+            'arthash'   => 1,
+            'vat'       => 0,
         ];
 
         $modelFactory = oxNew(ModelFactory::class);
@@ -591,7 +591,7 @@ class Details extends AdminDetailsController
             $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
             foreach ($articles as $article) {
                 if (Registry::getRequest()->getRequestEscapedParameter($article['arthash']) > 0) {
-                    $quant = Registry::getRequest()->getRequestEscapedParameter($article['arthash']);
+                    $quant = (int) Registry::getRequest()->getRequestEscapedParameter($article['arthash']);
                     $artid = $article['artid'];
                     $uniqueArticleNumber = $article['unique_article_number'];
                     if (empty($uniqueArticleNumber)) {
@@ -628,12 +628,12 @@ class Details extends AdminDetailsController
     {
         $ratepayHistory = oxNew(History::class);
         $ratepayHistory->assign([
-            'order_number' => $orderId,
+            'order_number'   => $orderId,
             'article_number' => $artid,
-            'quantity' => $quant,
-            'method' => $operation,
-            'submethod' => $subtype,
-            'date' => date('Y-m-d H:i:s', Registry::get("oxUtilsDate")->getTime())
+            'quantity'       => $quant,
+            'method'         => $operation,
+            'submethod'      => $subtype,
+            'date'           => date('Y-m-d H:i:s', Registry::get("oxUtilsDate")->getTime())
         ]);
         $ratepayHistory->save();
     }
@@ -700,13 +700,13 @@ class Details extends AdminDetailsController
         // stock information
         if ($myConfig->getConfigParam('blUseStock')) {
             $oArticle->updateArticleStock(
-                $oArticle->oxorderarticles__oxamount->value,
+                $oArticle->getFieldData('oxamount'),
                 $myConfig->getConfigParam('blAllowNegativeStock')
             );
         }
         $oQueryBuilder
             ->update('oxorderarticles')
-            ->set('oxstorno', $oArticle->oxorderarticles__oxstorno->value)
+            ->set('oxstorno', $oArticle->getFieldData('oxstorno'))
             ->where('oxid = :oxid')
             ->setParameter(':oxid', $sOrderArtId);
         $oQueryBuilder->execute();
@@ -813,7 +813,7 @@ class Details extends AdminDetailsController
     {
         if ($this->_paymentSid === null) {
             $order = $this->getEditObject();
-            $this->_paymentSid = isset($order) ? $order->getPaymentType()->oxuserpayments__oxpaymentsid->value : false;
+            $this->_paymentSid = isset($order)? $order->getPaymentType()->getFieldData('oxpaymentsid') : false;
         }
         return $this->_paymentSid;
     }
