@@ -278,8 +278,8 @@
         <input type="hidden" name="cl" value="RatepayDetails">
         <input type="hidden" name="fnc" value="credit">
         <span>{{ translate({ ident: "PI_RATEPAY_VALUE" }) }}: </span>
-        <input id='voucherAmount' type='text' style="float:none;" maxlength='4' name='voucherAmount' size='4' value='0' onkeyup="check_voucher('{{ pi_total_amount }}');" onFocus="this.select();">{{ translate({ ident: "PI_RATEPAY_KOMMA" }) }}<input style='float:none;' id='voucherAmountKomma' type='text' maxlength='2' name='voucherAmountKomma' size='2' value='00' onkeyup="check_voucher('{{ pi_total_amount }}');" onFocus="hideMessageBox();this.select();" onBlur="hideMessageBox();">{{ article.currency }}<br><br>
-        <input type='submit' name='voucher' value='&nbsp;&nbsp;{{ translate({ ident: "PI_RATEPAY_VOUCHER" }) }}&nbsp;&nbsp;'">
+        <input id='voucherAmount' type='text' style="float:none;" maxlength='7' name='voucherAmount' size='7' value='00.00' onkeyup="check_voucher('{{ pi_total_amount }}');" onFocus="this.select();">{{ article.currency }}<br><br>
+        <input type='submit' id='voucher' name='voucher'  disabled='disabled'  value='&nbsp;&nbsp;{{ translate({ ident: "PI_RATEPAY_VOUCHER" }) }}&nbsp;&nbsp;'">
     </form>
 </fieldset>
 {% set historyCount = "0" %}
@@ -364,31 +364,21 @@
     function check_voucher(totalamount) {
         var vouchertotal = 0;
         var sub = document.getElementById('voucherAmount').value;
-        var subKomma = document.getElementById('voucherAmountKomma').value;
-        if(sub.match(/^[0-9]{1,4}$/i)) {
-            vouchertotal = parseInt(sub);
+        if(sub.match(/^[0-9]{1,4}[\.,]{0,1}[0-9]{0,2}$/i)) {
+            sub = sub.replace(',','.')
+            vouchertotal = parseFloat(sub);
             if(vouchertotal > totalamount) {
-                document.getElementById('voucherAmount').value = "0";
+                document.getElementById('voucher').disabled = true;
                 document.getElementById('message').style.visibility = 'visible';
             } else {
-                if(subKomma.match(/^[0-9]{1,2}$/i)) {
-                    vouchertotal = sub + "." + subKomma;
-                    vouchertotal = parseFloat(vouchertotal);
-                    totalamount = parseFloat(totalamount);
-                    if(vouchertotal > totalamount) {
-                        document.getElementById('message').style.visibility = 'visible';
-                        document.getElementById('voucherAmountKomma').value = "00";
-                    }
-                } else {
-                    document.getElementById('message').style.visibility = 'visible';
-                    document.getElementById('voucherAmountKomma').value = "00";
-                }
+                document.getElementById('voucher').disabled = false;
             }
         } else {
             document.getElementById('message').style.visibility = 'visible';
-            document.getElementById('voucherAmount').value = "0";
+            document.getElementById('voucher').disabled = true;
         }
     }
+    
     function hideMessageBox() {
         document.getElementById('message').style.visibility = 'hidden';
     }
