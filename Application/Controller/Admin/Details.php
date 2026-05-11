@@ -242,9 +242,9 @@ class Details extends AdminDetailsController
      */
     public function credit()
     {
-        $voucherAmount = Registry::getConfig()->getRequestParameter('voucherAmount');
+        $voucherAmount = Registry::getRequest()->getRequestEscapedParameter('voucherAmount');
 
-        $this->_initRatepayDetails($this->getEditObject());
+        $this->initRatepayDetails($this->getEditObject());
         $voucherAmount = str_replace(",", ".", $voucherAmount);
         if (isset($voucherAmount) && preg_match("/^[0-9]{1,4}[\.,]{0,1}[0-9]{0,2}$/", $voucherAmount)) {
             $voucherAmount = (double)$voucherAmount;
