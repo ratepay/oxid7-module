@@ -3,6 +3,8 @@
 namespace pi\ratepay\Core;
 
 use OxidEsales\Eshop\Core\Model\ListModel;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 
 /**
  *
@@ -40,14 +42,20 @@ class HistoryList extends ListModel
      */
     public function getFilteredList($where = null)
     {
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
         $oListObject = $this->getBaseObject();
         $sFieldList = $oListObject->getSelectFields();
-        $sQ = "select $sFieldList from " . $oListObject->getViewName();
 
-        if ($where != null) {
-            $sQ .= " where $where ";
+        $oQueryBuilder->select("$sFieldList")
+            ->from($oListObject->getViewName());
+
+        if ($where !== null) {
+            $oQueryBuilder->where("$where");
         }
-        $this->selectString($sQ);
+        $this->selectString($oQueryBuilder->getSQL());
 
         return $this;
     }

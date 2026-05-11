@@ -338,7 +338,7 @@ class DetailsViewData extends BaseModel
             $sOrderCountryId = $aOrderValues[0]['OXBILLCOUNTRYID'];
             $oOrderCountry = oxNew('oxcountry');
             if ($oOrderCountry->load($sOrderCountryId)) {
-                if ($oOrderCountry->oxcountry__oxvatstatus->value == 0) {
+                if ($oOrderCountry->getFieldData('oxvatstatus') == 0) {
                     $dVoucherVat = 0;
                 };
             }

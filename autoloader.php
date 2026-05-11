@@ -1,4 +1,5 @@
 <?php
+
 /**
  *
  * Copyright (c) Ratepay GmbH

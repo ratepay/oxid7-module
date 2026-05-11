@@ -3,6 +3,8 @@
 namespace pi\ratepay\Application\Model;
 
 use OxidEsales\Eshop\Core\Model\ListModel;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 
 /**
  *
@@ -42,29 +44,32 @@ class LogsList extends ListModel
      */
     public function getFilteredList($where = null, $orderBy = null)
     {
-        $listObject = $this->getBaseObject();
-        $fieldList = $listObject->getSelectFields();
-        $query = "select $fieldList from " . $listObject->getViewName();
+        $oContainer = ContainerFactory::getInstance()->getContainer();
+        /** @var QueryBuilderFactoryInterface $queryBuilderFactory */
+        $oQueryBuilderFactory = $oContainer->get(QueryBuilderFactoryInterface::class);
+        $oQueryBuilder = $oQueryBuilderFactory->create();
+        $oListObject = $this->getBaseObject();
+        $sFieldList = $oListObject->getSelectFields();
+
+        $oQueryBuilder->select("$sFieldList")
+            ->from($oListObject->getViewName());
 
         if ($where !== null) {
-            $query .= " where $where ";
+            $oQueryBuilder->where("$where");
         }
 
         if ($orderBy !== null) {
-            $lastArrayItem = end($orderBy);
-            $addition = ', ';
-
-            $query .= ' order by ';
-
+            $firstArrayItem = reset($orderBy);
             foreach ($orderBy as $orderByItem) {
-                if ($orderByItem == $lastArrayItem)
-                    $addition = '';
-                $query .= $orderByItem['column'] . ' ' . $orderByItem['direction'] . $addition;
+                if ($firstArrayItem == $orderByItem) {
+                    $oQueryBuilder->orderBy($orderByItem['column'], $orderByItem['direction']);
+                } else {
+                    $oQueryBuilder->addOrderBy($orderByItem['column'], $orderByItem['direction']);
+                }
             }
         }
-
-        $this->selectString($query);
-
+        $this->selectString($oQueryBuilder->getSQL());
+        
         return $this;
     }
 

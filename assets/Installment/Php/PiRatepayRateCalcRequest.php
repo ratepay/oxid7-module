@@ -14,6 +14,7 @@ $calcValue = $pi_calculator->getPostParameter('calcValue');
 $calcMethod = $pi_calculator->getPostParameter('calcMethod');
 $bankAccount = $pi_calculator->getPostParameter('bankAccount');
 $paymentFirstday = $pi_calculator->getPostParameter('paymentFirstday');
+$cl = $pi_calculator->getPostParameter('cl') == 'null' ? 'order' : $pi_calculator->getPostParameter('cl');
 
 $sPaymentMethod = $pi_calculator->getPaymentMethod();
 if ($calcValue != '' && $calcMethod != '') {
@@ -55,7 +56,7 @@ if ($calcValue != '' && $calcMethod != '') {
         $pi_calculator->setErrorMsg('wrongsubtype');
     }
 } else {
-    if (empty($calcValue) && $pi_calculator->getPostParameter('cl') != 'order') {
+    if (empty($calcValue) && $cl != 'order') {
         $pi_calculator->setErrorMsg('novalue');
     } else {
         $bShowPiResultArray = true;

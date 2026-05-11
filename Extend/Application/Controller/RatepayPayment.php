@@ -2,6 +2,17 @@
 
 namespace pi\ratepay\Extend\Application\Controller;
 
+use OxidEsales\Eshop\Core\Field;
+use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\Eshop\Core\Session;
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
+use pi\ratepay\Application\Model\Settings;
+use pi\ratepay\Core\PaymentBan;
+use pi\ratepay\Core\Utilities;
+use pi\ratepay\Extend\Application\Model\RatepayOxorder;
+use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
+
 /**
  *
  * Copyright (c) Ratepay GmbH
@@ -9,18 +20,6 @@ namespace pi\ratepay\Extend\Application\Controller;
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
-use OxidEsales\Eshop\Core\Field;
-use OxidEsales\Eshop\Core\Registry;
-use OxidEsales\Eshop\Core\Session;
-use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
-use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
-use OxidEsales\PayPalModule\Model\Address;
-use pi\ratepay\Application\Model\Settings;
-use pi\ratepay\Core\PaymentBan;
-use pi\ratepay\Core\Utilities;
-use pi\ratepay\Extend\Application\Model\RatepayOxorder;
-use OxidEsales\EshopCommunity\Internal\Framework\Module\Facade\ModuleSettingServiceInterface;
 
 /**
  * {@inheritdoc}
@@ -116,12 +115,12 @@ class RatepayPayment extends RatepayPayment_parent
      */
     private function getBanUserId()
     {
-        if (is_null($this->getUser()->oxuser__oxregister->value) || $this->getUser(
-            )->oxuser__oxregister->value == '0000-00-00 00:00:00') {
-            return $this->getUser()->oxuser__oxusername->value;
+        if (is_null($this->getUser()->getFieldData('oxregister')) ||
+            $this->getUser()->getFieldData('oxregister') == '0000-00-00 00:00:00') {
+            return $this->getUser()->getFieldData('oxusername');
         }
 
-        return $this->getUser()->oxuser__oxid->value;
+        return $this->getUser()->getFieldData('oxid');
     }
 
     /**
@@ -184,7 +183,7 @@ class RatepayPayment extends RatepayPayment_parent
     {
         $settings = $this->getRatePaySettings($paymentMethod);
         $b2b = (bool)$settings->pi_ratepay_settings__b2b->rawValue;
-        $company = (!empty($this->getUser()->oxuser__oxcompany->value));
+        $company = (!empty($this->getUser()->getFieldData('oxcompany')));
         return (!$company || $b2b);
     }
 
@@ -277,22 +276,22 @@ class RatepayPayment extends RatepayPayment_parent
 
                 $this->addTplParam($paymentMethod . '_country', $sCountry);
 
-                if (empty($customer->oxuser__oxfon->value)
-                    && empty($customer->oxuser__oxprivfon->value)
-                    && empty($customer->oxuser__oxmobfon->value)
+                if (empty($customer->getFieldData('oxfon'))
+                    && empty($customer->getFieldData('oxprivfon'))
+                    && empty($customer->getFieldData('oxmobfon'))
                 ) {
                     $this->addTplParam($paymentMethod . '_fon_check', 'true');
                 }
 
-                if ($customer->oxuser__oxbirthdate->value == "0000-00-00") {
+                if ($customer->getFieldData('oxbirthdate') == "0000-00-00") {
                     $this->addTplParam($paymentMethod . '_birthdate_check', 'true');
                 }
 
-                if (empty($customer->oxuser__oxcompany->value) xor empty($customer->oxuser__oxustid->value)) {
-                    if (empty($customer->oxuser__oxcompany->value)) {
+                if (empty($customer->getFieldData('oxcompany')) xor empty($customer->getFieldData('oxustid'))) {
+                    if (empty($customer->getFieldData('oxcompany'))) {
                         $this->addTplParam($paymentMethod . '_company_check', 'true');
                     } else {
-                        if (empty($customer->oxuser__oxustid->value)) {
+                        if (empty($customer->getFieldData('oxustid'))) {
                             $this->addTplParam($paymentMethod . '_ust_check', 'true');
                         }
                     }
@@ -396,10 +395,10 @@ class RatepayPayment extends RatepayPayment_parent
      * The data in question are contact details (phone and/or mobile number),
      * the birthdate of the user, and if it's a business or a person tax number.
      * Validates only if all data is set (tax only if it's a business).
-     * @return string
      * @see Payment::validatePayment()
+     * @return mixed
      */
-    public function validatePayment()
+    public function validatePayment(): mixed
     {
         if (!($paymentId = Registry::getRequest()->getRequestEscapedParameter('paymentid'))) {
             $paymentId = oxNew(Session::class)->getVariable('paymentid');
@@ -436,7 +435,7 @@ class RatepayPayment extends RatepayPayment_parent
     }
 
     /**
-     * Checks if user aggreed
+     * Checks if user agreed
      * @return bool
      */
     private function checkPrivacy()
@@ -465,7 +464,7 @@ class RatepayPayment extends RatepayPayment_parent
     {
         $user = $this->getUser();
 
-        if (!empty($user->oxuser__oxcompany->value) || !empty($user->oxuser__oxustid->value)) {
+        if (!empty($user->getFieldData('oxcompany')) || !empty($user->getFieldData('oxustid'))) {
             return true;
         } else {
             return false;
@@ -480,8 +479,8 @@ class RatepayPayment extends RatepayPayment_parent
     {
         $user = $this->getUser();
 
-        $companySet = !empty($user->oxuser__oxcompany->value) && !empty($user->oxuser__oxustid->value);
-        $companyNotSet = empty($user->oxuser__oxcompany->value) && empty($user->oxuser__oxustid->value);
+        $companySet = !empty($user->getFieldData('oxcompany')) && !empty($user->getFieldData('oxustid'));
+        $companyNotSet = empty($user->getFieldData('oxcompany')) && empty($user->getFieldData('oxustid'));
 
         if ($companySet || $companyNotSet) {
             return true;
@@ -505,7 +504,7 @@ class RatepayPayment extends RatepayPayment_parent
             $this->setUser($user);
         }
 
-        if (empty($user->oxuser__oxcompany->value) && !empty($user->oxuser__oxustid->value)) {
+        if (empty($user->getFieldData('oxcompany')) && !empty($user->getFieldData('oxustid'))) {
             $this->_errors[] = '-416';
             return false;
         }
@@ -522,7 +521,7 @@ class RatepayPayment extends RatepayPayment_parent
     {
         $isBirthdateValid = false;
         $user = $this->getUser();
-        $birthdate = $user->oxuser__oxbirthdate->value;
+        $birthdate = $user->getFieldData('oxbirthdate');
 
         if (!empty($birthdate) && $birthdate != '0000-00-00') {
             return true;
@@ -629,9 +628,9 @@ class RatepayPayment extends RatepayPayment_parent
         $isZipValid = false;
         $user = $this->getUser();
         $country = $this->getCountry();
-        if ($country == "DE" && strlen($user->oxuser__oxzip->value) == 5) {
+        if ($country == "DE" && strlen($user->getFieldData('oxzip')) == 5) {
             $isZipValid = true;
-        } elseif (($country == 'AT' || $country == 'CH') && strlen($user->oxuser__oxzip) == 4) {
+        } elseif (($country == 'AT' || $country == 'CH') && strlen($user->getFieldData('oxzip')) == 4) {
             $isZipValid = true;
         } elseif ($country == 'NL') {
             $isZipValid = true;
@@ -673,8 +672,8 @@ class RatepayPayment extends RatepayPayment_parent
             $sCountry = $oQueryBuilder->execute();
             $sCountry = $sCountry->fetchOne();
 
-            if ($sCountry == "DE" && strlen($this->getDelAddress()->oxaddress__oxzip->value) == 5) {
-            } elseif (($sCountry == 'AT' || $sCountry == 'CH') && strlen($this->getDelAddress()->oxaddress__oxzip) == 4) {
+            if ($sCountry == "DE" && strlen($this->getDelAddress()->getFieldData('oxzip')) == 5) {
+            } elseif (($sCountry == 'AT' || $sCountry == 'CH') && strlen($this->getDelAddress()->getFieldData('oxzip')) == 4) {
             } elseif ($sCountry == 'NL') {
             } else {
                 switch ($this->_selectedPaymentMethod) {
@@ -710,9 +709,9 @@ class RatepayPayment extends RatepayPayment_parent
     {
         $isFonValid = false;
         $user = $this->getUser();
-        $fon = $user->oxuser__oxfon->value;
-        $mobil = $user->oxuser__oxmobfon->value;
-        $phoneNumbers = [$fon, $user->oxuser__oxprivfon->value, $mobil];
+        $fon = $user->getFieldData('oxfon');
+        $mobil = $user->getFieldData('oxmobfon');
+        $phoneNumbers = [$fon, $user->getFieldData('oxprivfon'), $mobil];
 
         foreach ($phoneNumbers as $phoneNumber) {
             if (!empty($phoneNumber)) {
@@ -791,7 +790,7 @@ class RatepayPayment extends RatepayPayment_parent
             ->select('OXISOALPHA2')
             ->from('oxcountry')
             ->where('OXID = :oxid')
-            ->setParameter(':oxid', $this->getUser()->oxuser__oxcountryid->value);
+            ->setParameter(':oxid', $this->getUser()->getFieldData('oxcountryid'));
         $sUserCountry = $oQueryBuilder->execute();
         $sUserCountry = strtoupper($sUserCountry->fetchOne());
 
@@ -890,7 +889,7 @@ class RatepayPayment extends RatepayPayment_parent
      */
     private function checkAge()
     {
-        $dob = $this->getUser()->oxuser__oxbirthdate->value;
+        $dob = $this->getUser()->getFieldData('oxbirthdate');
 
         // check age if birthdate is set
         if ($dob != "0000-00-00") {
@@ -994,7 +993,7 @@ class RatepayPayment extends RatepayPayment_parent
         $oDelAddress = $this->getDelAddress();
 
         if ($oDelAddress != "") {
-            if ($oUser->oxuser__oxcountryid->value != $oDelAddress->oxaddress__oxcountryid->value) {
+            if ($oUser->getFieldData('oxcountryid') != $oDelAddress->getFieldData('oxcountryid')) {
                 return false;
             }
         }
@@ -1093,7 +1092,6 @@ class RatepayPayment extends RatepayPayment_parent
         if (!empty($blRatepayScriptSend)) {
             $this->addTplParam('pi_ratepay_script_send', $blRatepayScriptSend);
         }
-
     }
 
     public function setDiScriptSendAjax() {

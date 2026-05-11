@@ -251,9 +251,9 @@ class Settings extends BaseModel
             return ['debit', 'banktransfer', 'both']; // Settings not set yet
         }
 
-        if ($this->pi_ratepay_settings__payment_firstday->value == '2,28') {
+        if ($this->getFieldData('payment_firstday') == '2,28') {
             return ['debit', 'banktransfer', 'both'];
-        } elseif ($this->pi_ratepay_settings__payment_firstday->value == '28') {
+        } elseif ($this->getFieldData('payment_firstday') == '28') {
             return ['banktransfer'];
         }
         return ['debit'];
@@ -261,14 +261,13 @@ class Settings extends BaseModel
 
     public function getSettlementType()
     {
-        if (($this->pi_ratepay_settings__type->value != 'installment' && $this->pi_ratepay_settings__type->value != 'installment0') || !in_array($this->pi_ratepay_settings__country->value, ['DE', 'AT']
-            )) {
+        if (($this->getFieldData('type') != 'installment' && $this->getFieldData('type') != 'installment0') || !in_array($this->getFieldData('country'),['DE', 'AT'])) {
             return false;
         }
 
-        if ($this->pi_ratepay_settings__payment_firstday->value == '2,28') {
+        if ($this->getFieldData('payment_firstday') == '2,28') {
             return 'both';
-        } elseif ($this->pi_ratepay_settings__payment_firstday->value == '28') {
+        } elseif ($this->getFieldData('payment_firstday') == '28') {
             return 'banktransfer';
         }
         return 'debit';
