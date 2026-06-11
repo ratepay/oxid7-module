@@ -36,6 +36,10 @@ require_once 'PiRatepayRateCalcDataInterface.php';
 
 require_once getShopBasePath() . 'bootstrap.php';
 
+if (!Registry::getSession()->isSessionStarted()) {
+    Registry::getSession()->start();
+}
+
 
     /**
  * {@inheritdoc}
