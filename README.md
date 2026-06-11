@@ -5,14 +5,18 @@
 |------|----------
 |Author | `Fatchip GmbH`
 |Prefix | `pi`
-|Shop Version | `CE/PE` `CE/PE/EE` `7.0.x-7.4.x`
-|Version | `1.0.3`
+|Shop Version | `CE/PE` `CE/PE/EE` `7.0.x-7.5.x`
+|Version | `1.0.4`
 |Link | http://www.ratepay.com
 |Mail | integration@ratepay.com
 |Full Documentation | [click here](https://docs.ratepay.com/docs/developer/shop_modules/oxid/ratepay_payment_plugin_for_oxid/)|
 |Legal Disclaimer   | [click here](https://docs.ratepay.com/docs/developer/shop_modules/overview/)| 
 
 ## Changelog
+
+### Version 1.0.4 - Released 2026-06-11
+* Fix : Init session for calculator calls
+* Update : Change php-library version in composer.json for PHP 8.5 support
 
 ### Version 1.0.3 - Released 2026-06-09
 * Fix : Backend order voucher validation
