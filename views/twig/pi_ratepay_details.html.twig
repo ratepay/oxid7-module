@@ -363,6 +363,7 @@
     }
     function check_voucher(totalamount) {
         var vouchertotal = 0;
+        totalamount = Math.round(totalamount * 100) / 100
         var sub = document.getElementById('voucherAmount').value;
         if(sub.match(/^[0-9]{1,4}[\.,]{0,1}[0-9]{0,2}$/i)) {
             sub = sub.replace(',','.')
