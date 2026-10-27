@@ -39,9 +39,6 @@
 }
 
 /* /// SEPA Mandate notice panel /// */
-#pi_ratepay_rate_sepa_policy_panel, #pi_ratepay_rate0_sepa_policy_panel {
-    max-width: 60%;
-}
 .panel {
     width: 100%;
     background-color: #ffffff;
