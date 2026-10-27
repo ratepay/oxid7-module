@@ -318,10 +318,7 @@
                         </p>
                     </div>
                 {% endif %}
-                <div>
-                    {{ translate({ ident: "PI_RATEPAY_POLICY" }) }}
-                </div>
-                </br>
+                <br/>
                 <ul class="form pi_ratepay_rechnung_form pi_ratepay_form">
                     {% if isset(pi_ratepay_rechnung_fon_check) %}
                         <li>
@@ -351,6 +348,10 @@
                         </li>
                     {% endif %}
                 </ul>
+
+                <div style="padding-top: 16px">
+                    {{ translate({ ident: "PI_RATEPAY_POLICY" }) }}
+                </div>
             </div>
             {% if paymentmethod.getPrice() %}
                 <div class="payment-option-price">
@@ -392,9 +393,6 @@
                         </p>
                     </div>
                 {% endif %}
-                <div>
-                    {{ translate({ ident: "PI_RATEPAY_POLICY" }) }}
-                </div>
                 </br>
                 <ul class="form pi_ratepay_rate_form pi_ratepay_form">
                     {% if isset(pi_ratepay_rate_fon_check) %}
@@ -508,9 +506,6 @@
                         </p>
                     </div>
                 {% endif %}
-                <div>
-                    {{ translate({ ident: "PI_RATEPAY_POLICY" }) }}
-                </div>
                 </br>
                 <ul class="form pi_ratepay_rate0_form pi_ratepay_form">
                     {% if isset(pi_ratepay_rate0_fon_check) %}
@@ -631,29 +626,7 @@
                         </p>
                     </div>
                 {% endif %}
-                <div>
-                    {{ translate({ ident: "PI_RATEPAY_POLICY" }) }}
-                </div>
                 <br/>
-                <div class="panel" id="{{ sPaymentID }}_sepa_policy_panel">
-                    <div class="panel-header" id="{{ sPaymentID }}_sepa_policy_panel_title">
-                        {{ translate({ ident: "PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_0" }) }}
-                        <span class="panel-icon">▼</span>
-                    </div>
-                    <div class="panel-body-wrapper">
-                        <div class="panel-body-content">
-                            <p class="panel-text">
-                                {{ translate({ ident: "PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_1" }) }}
-                            </p>
-                            <p class="panel-text">
-                                {{ translate({ ident: "PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_2" }) }}
-                            </p>
-                            <p class="panel-text">
-                                {{ translate({ ident: "PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_3" }) }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
                 <ul class="form pi_ratepay_elv_form pi_ratepay_form">
                     {% if isset(pi_ratepay_elv_fon_check) %}
                         <li>
@@ -702,6 +675,26 @@
                         <label class="">{{ translate({ ident: "PI_RATEPAY_ELV_VIEW_BANK_IBAN" }) }}</label>
                         <input id="pi_ratepay_elv_bank_iban" name="pi_ratepay_elv_bank_iban" onchange="checkSepaForm()" maxlength='50' size='37' type="text" value="{{ pi_ratepay_elv_bank_iban }}" class="form-control required" />
                     </p>
+                </div>
+
+                <div class="panel" id="{{ sPaymentID }}_sepa_policy_panel">
+                    <div class="panel-header" id="{{ sPaymentID }}_sepa_policy_panel_title">
+                        {{ translate({ ident: "PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_0" }) }}
+                        <span class="panel-icon">▼</span>
+                    </div>
+                    <div class="panel-body-wrapper">
+                        <div class="panel-body-content">
+                            <p class="panel-text">
+                                {{ translate({ ident: "PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_1" }) }}
+                            </p>
+                            <p class="panel-text">
+                                {{ translate({ ident: "PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_2" }) }}
+                            </p>
+                            <p class="panel-text">
+                                {{ translate({ ident: "PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_3" }) }}
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="margin: 15px 0;">

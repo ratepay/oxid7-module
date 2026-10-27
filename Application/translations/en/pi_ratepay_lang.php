@@ -27,6 +27,6 @@ $aLang = [
     'PI_RATEPAY_VIEW_RADIO_LABEL_ELV'                 => 'By direct debit',
     'PI_RATEPAY_VIEW_RADIO_PAYMENT_WIRE'              => 'By bank transfer',
     'PI_RATEPAY_VIEW_RATEPAY_ADDRESS'                 => 'Ratepay GmbH, Ritterstra&szlig;e 12-14, 10969 Berlin',
-    'PI_RATEPAY_POLICY'                               => "<p>With selection of these payment method you agree to the <a href='//www.ratepay.com/en/ratepay-terms-of-payment' title='Legal terms - Ratepay' target='_blank' style='text-decoration: underline; cursor: pointer'>terms of payment of our payment partner</a> as well as to the performance of a <a href='//www.ratepay.com/en/ratepay-data-privacy-statement' title='Legal data privacy - Ratepay' target='_blank' style='text-decoration: underline; cursor: pointer'>risk check by our payment partner</a>.</p>",
+    'PI_RATEPAY_POLICY'                               => "<p>By clicking \"Order now\", you agree to the <a href='//www.ratepay.com/en/ratepay-terms-of-payment' title='Legal terms - Ratepay' target='_blank' style='text-decoration: underline; cursor: pointer'>Ratepay Terms of Payment</a>, and to a <a href='//www.ratepay.com/en/ratepay-data-privacy-statement' title='Legal data privacy - Ratepay' target='_blank' style='text-decoration: underline; cursor: pointer'>risk check performed by Ratepay</a>.</p>",
     'PI_RATEPAY_VIEW_RATEPAY_INFO'                    => 'The mandate reference and creditor identifier will be communicated to you separately',
 ];
