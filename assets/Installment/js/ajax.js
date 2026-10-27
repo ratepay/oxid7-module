@@ -110,11 +110,9 @@ function rp_change_payment(payment, paymentMethod) {
 
 function rpToggleSepaPolicy(paymentId) {
     const panelHeader = document.getElementById(paymentId + '_sepa_policy_panel_title');
-    const panel = panelHeader.parentElement;
-
-    panelHeader.addEventListener('click', () => {
-        panel.classList.toggle('is-open');
-    });
+    if (panelHeader && panelHeader.parentElement) {
+        panelHeader.parentElement.classList.toggle('is-open');
+    }
 }
 
 function piLoadrateCalculator(paymentMethod) {
