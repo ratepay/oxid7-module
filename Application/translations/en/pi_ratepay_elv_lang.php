@@ -24,7 +24,7 @@ $aLang = [
     'PI_RATEPAY_ELV_VIEW_SANDBOX_NOTIFICATION'      => 'Testmode activated, please DONT use this payment method and get in contact with the merchant.',
     'PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_0'  => 'SEPA Direct Debit Mandate — declaration',
     'PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_1'  => 'By agreeing to the SEPA Direct Debit Mandate, you authorise Ratepay GmbH to collect payments from your account by direct debit. At the same time, you instruct your bank to debit your account in accordance with the instructions from Ratepay GmbH.',
-    'PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_2'  => '<span style="font-weight: bold">Hinweis:</span> As part of your rights, you are entitled to a refund from your bank. A refund must be claimed within 8 weeks, starting from the date on which your account was debited. The terms and conditions of your bank apply.',
+    'PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_2'  => '<span style="font-weight: bold">Note:</span> As part of your rights, you are entitled to a refund from your bank. A refund must be claimed within 8 weeks, starting from the date on which your account was debited. The terms and conditions of your bank apply.',
     'PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_3'  => 'The mandate reference and creditor identification number will be communicated to you separately.',
     'PI_RATEPAY_ELV_VIEW_CREDITOR_ID_TEXT'          => 'Creditor ID',
     'PI_RATEPAY_ELV_VIEW_CREDITOR_ID_VALUE'         => 'DE39RPY00000568463',

@@ -54,7 +54,7 @@ $rp_switch_payment_type_bank_transfer = "I would like to make the installment pa
 $rp_switch_payment_type_direct_debit = "I would like to conveniently pay the installments by direct debit";
 $rp_mand_cred_notification_0 = "SEPA Direct Debit Mandate — declaration";
 $rp_mand_cred_notification_1 = "By agreeing to the SEPA Direct Debit Mandate, you authorise Ratepay GmbH to collect payments from your account by direct debit. At the same time, you instruct your bank to debit your account in accordance with the instructions from Ratepay GmbH.";
-$rp_mand_cred_notification_2 = "<span style='font-weight: bold'>Hinweis:</span> As part of your rights, you are entitled to a refund from your bank. A refund must be claimed within 8 weeks, starting from the date on which your account was debited. The terms and conditions of your bank apply.";
+$rp_mand_cred_notification_2 = "<span style='font-weight: bold'>Note:</span> As part of your rights, you are entitled to a refund from your bank. A refund must be claimed within 8 weeks, starting from the date on which your account was debited. The terms and conditions of your bank apply.";
 $rp_mand_cred_notification_3 = "The mandate reference and creditor identification number will be communicated to you separately.";
 $rp_address = "Ratepay GmbH, Ritterstra&szlig;e 12-14, 10969 Berlin";
 $wcd_address = "Wirecard Bank AG, Einsteinring 35, 85609 Aschheim";
