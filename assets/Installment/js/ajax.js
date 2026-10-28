@@ -47,7 +47,6 @@ function piRatepayRateCalculatorAction(mode, paymentMethod, month) {
 
             if (document.getElementById(paymentMethod + '_pi_ratepay_rate_bank_iban').style.display === 'block'
                 && document.getElementById(paymentMethod + '_pi_ratepay_rate_bank_iban').value !== ''
-                && document.getElementById(paymentMethod + '_rp-sepa-aggreement').checked === true
             ) {
                 document.querySelector('.sticky-md-top .btn').disabled = false;
             }
@@ -97,14 +96,23 @@ function rp_change_payment(payment, paymentMethod) {
         document.getElementById(paymentMethod + '_pi_ratepay_rate_bank_iban').style.display = 'none';
         document.getElementById(paymentMethod + '_rp-rate-elv').style.display = 'none';
         document.getElementById(paymentMethod + '_rp-switch-payment-type-direct-debit').style.display = 'block';
+        document.getElementById(paymentMethod + '_rp-bank-agreement').style.display = 'block';
         document.getElementById(paymentMethod + '_paymentFirstday').value = 2;
     } else {
         document.getElementById(paymentMethod + '_pi_ratepay_rate_bank_iban').style.display = 'block';
         document.getElementById(paymentMethod + '_rp-rate-elv').style.display = 'block';
         document.getElementById(paymentMethod + '_rp-switch-payment-type-direct-debit').style.display = 'none';
+        document.getElementById(paymentMethod + '_rp-bank-agreement').style.display = 'none';
         document.getElementById(paymentMethod + '_paymentFirstday').value = 28;
     }
     updateCalculator(paymentMethod);
+}
+
+function rpToggleSepaPolicy(paymentId) {
+    const panelHeader = document.getElementById(paymentId + '_sepa_policy_panel_title');
+    if (panelHeader && panelHeader.parentElement) {
+        panelHeader.parentElement.classList.toggle('is-open');
+    }
 }
 
 function piLoadrateCalculator(paymentMethod) {

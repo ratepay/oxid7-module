@@ -108,15 +108,6 @@ if ($pi_calculator->getErrorMsg() != '') {
                         </div><br>
                     <?php endif; ?>
 
-                    <div class="rp-row-space rp-sepa-form">
-                        <table class="rp-sepa-table">
-                            <tr>
-                                <td colspan="2">
-                                    <?php echo $rp_creditor_info ?>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
                     <br/>
                     <div class="rp-sepa-form rp-special-item rp-row-space">
                         <?php echo $wcd_sepa_notice_block; ?>
@@ -151,16 +142,32 @@ if ($pi_calculator->getErrorMsg() != '') {
                             </form>
                         </div>
                     </div>
+
+                    <div class="panel" id="<?php echo $sPaymentMethod; ?>_sepa_policy_panel">
+                        <div class="panel-header" id="<?php echo $sPaymentMethod; ?>_sepa_policy_panel_title" onclick="rpToggleSepaPolicy('<?php echo $sPaymentMethod; ?>')">
+                            <?php echo $rp_mand_cred_notification_0; ?>
+                            <span class="panel-icon">▼</span>
+                        </div>
+                        <div class="panel-body-wrapper">
+                            <div class="panel-body-content">
+                                <p class="panel-text">
+                                    <?php echo $rp_mand_cred_notification_1; ?>
+                                </p>
+                                <p class="panel-text">
+                                    <?php echo $rp_mand_cred_notification_2; ?>
+                                </p>
+                                <p class="panel-text">
+                                    <?php echo $rp_mand_cred_notification_3; ?>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!--<div class="rp-row-space small rp-sepa-form" id="rp-show-sepa-agreement">
                     <a class="rp-link"><?php echo $rp_sepa_link; ?></a>
                 </div>-->
                     <div class="rp-row-space rp-sepa-form" id="<?php echo $sPaymentMethod; ?>_rp-sepa-agreement">
-                        <input type="checkbox" name="rp-sepa-aggreement" id="<?php echo $sPaymentMethod; ?>_rp-sepa-aggreement" onchange="updateCalculator('<?php echo $sPaymentMethod; ?>')" class="form-check-input required" />
                         <?php echo $rp_sepa_terms_block_21; ?>
-                        <br><br>
-                        <?php echo $rp_sepa_terms_block_22; ?>
-                        <br/><br/>
-                        <?php echo $rp_sepa_terms_block_23; ?>
                     </div><br/>
                 </div>
             </div>
@@ -174,6 +181,9 @@ if ($pi_calculator->getErrorMsg() != '') {
                         <a class="rp-link"><?php echo $rp_switch_payment_type_direct_debit; ?></a>
                     </div>
                 </div>
+                <div class="row rp-row-space rp-sepa-form" id="<?php echo $sPaymentMethod; ?>_rp-bank-agreement">
+                    <?php echo $rp_bank_terms_block_21; ?>
+                </div><br/>
             <?php endif; ?>
         <?php endif; ?>
     </div>

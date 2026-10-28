@@ -37,6 +37,53 @@
 #pi_ratepay_rate_rp-show-installment-plan-details, #pi_ratepay_rate0_rp-show-installment-plan-details {
     display: block;
 }
+
+/* /// SEPA Mandate notice panel /// */
+.panel {
+    width: 100%;
+    background-color: #ffffff;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    margin-bottom: 16px;
+}
+.panel-header {
+    background: white;
+    padding: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    transition: background 0.3s ease;
+    border-bottom: solid 1px #ccc;
+}
+.panel-icon {
+    font-size: 0.8rem;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.panel-body-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.panel-body-content {
+    overflow: hidden;
+}
+.panel-text {
+    padding: 16px;
+    margin: 0;
+    font-weight: normal;
+}
+.panel.is-open .panel-body-wrapper {
+    grid-template-rows: 1fr;
+}
+.panel.is-open .panel-icon {
+    transform: rotate(180deg);
+}
+/* /// End SEPA Mandate notice panel /// */
+
 .rp-menue,
 .rp-installment-plan-details,
 .rp-installment-plan-no-details {
@@ -91,7 +138,7 @@
 #pi_ratepay_rate_rp-rate-elv .rp-link {
     margin-right: 6px;
 }
-#pi_ratepay_rate_rp-sepa-agreement, #pi_ratepay_rate0_rp-sepa-agreement {
+#pi_ratepay_rate_rp-sepa-agreement, #pi_ratepay_rate0_rp-sepa-agreement, #pi_ratepay_rate_rp-bank-agreement, #pi_ratepay_rate0_rp-bank-agreement {
     margin-left: 5px;
     margin-top: 19px;
 }
@@ -103,6 +150,10 @@
 }
 #pi_ratepay_rate_rp-switch-payment-type-direct-debit, #pi_ratepay_rate_rp-rate-elv, #pi_ratepay_rate0_rp-switch-payment-type-direct-debit, #pi_ratepay_rate0_rp-rate-elv {
     display: none;
+}
+#pi_ratepay_rate_rp-bank-agreement, #pi_ratepay_rate0_rp-bank-agreement {
+    display: none;
+    margin-top: 1rem;
 }
 #pi_ratepay_rate_rp-iban-account-number, #pi_ratepay_rate0_rp-iban-account-number {
     display: block;

@@ -240,6 +240,15 @@
         });
     }
 
+    function piToggleSepaPolicy(paymentId) {
+        const panelHeader = document.getElementById(paymentId + '_sepa_policy_panel_title');
+        const panel = panelHeader.parentElement;
+
+        panelHeader.addEventListener('click', () => {
+            panel.classList.toggle('is-open');
+        });
+    }
+
     function piShow(input, elementToToggle) {
         $(input).click(function() {
             $(elementToToggle).show();
@@ -253,16 +262,10 @@
     }
 
     function piCalculator() {
-        if ($('#payment_pi_ratepay_rate').is(':checked') || $('#payment_pi_ratepay_rate0').is(':checked')) {
-            var agreementCheckbox = $('#rp-sepa-aggreement');
-            agreementCheckbox.prop('checked', false);
-            $('.sticky-md-top').find('.btn').prop('disabled', true);
-        } else if ($('#payment_pi_ratepay_elv').is(':checked')) {
-            agreementCheckbox = $('#pi_ratepay_elv_sepa_agreement_check');
-            agreementCheckbox.prop('checked', false);
-            $('.sticky-md-top').find('.btn').prop('disabled', true);
-        } else {
+        if ($('#payment_pi_ratepay_rechnung').is(':checked')) {
             $('.sticky-md-top').find('.btn').prop('disabled', false);
+        } else {
+            checkSepaForm();
         }
     }
 
@@ -279,16 +282,22 @@
         }
     }
 
-    function checkElvForm() {
+    function checkSepaForm() {
+        let ibanField;
         if ($('#payment_pi_ratepay_elv').is(':checked')) {
-            var agreementCheckbox = $('#pi_ratepay_elv_sepa_agreement_check');
-            var ibanField = $('#pi_ratepay_elv_bank_iban');
-
-            if (ibanField.val() !== '' && agreementCheckbox.is(':checked')) {
-                $('.sticky-md-top').find('.btn').prop('disabled', false);
-            } else {
-                $('.sticky-md-top').find('.btn').prop('disabled', true);
-            }
+            ibanField = $('#pi_ratepay_elv_bank_iban');
+        } else if ($('#payment_pi_ratepay_rate').is(':checked')) {
+            ibanField = $('#pi_ratepay_rate_pi_ratepay_rate_bank_iban');
+        } else if ($('#payment_pi_ratepay_rate0').is(':checked')) {
+            ibanField = $('#pi_ratepay_rate0_pi_ratepay_rate_bank_iban');
+        } else {
+            $('.sticky-md-top').find('.btn').prop('disabled', false);
+            return;
+        }
+        if (ibanField && ibanField.val() !== '') {
+            $('.sticky-md-top').find('.btn').prop('disabled', false);
+        } else {
+            $('.sticky-md-top').find('.btn').prop('disabled', true);
         }
     }
 
@@ -312,10 +321,7 @@
                         </p>
                     </div>
                 {% endif %}
-                <div>
-                    {{ translate({ ident: "PI_RATEPAY_POLICY" }) }}
-                </div>
-                </br>
+                <br/>
                 <ul class="form pi_ratepay_rechnung_form pi_ratepay_form">
                     {% if isset(pi_ratepay_rechnung_fon_check) %}
                         <li>
@@ -345,6 +351,10 @@
                         </li>
                     {% endif %}
                 </ul>
+
+                <div style="padding-top: 16px">
+                    {{ translate({ ident: "PI_RATEPAY_POLICY" }) }}
+                </div>
             </div>
             {% if paymentmethod.getPrice() %}
                 <div class="payment-option-price">
@@ -386,9 +396,6 @@
                         </p>
                     </div>
                 {% endif %}
-                <div>
-                    {{ translate({ ident: "PI_RATEPAY_POLICY" }) }}
-                </div>
                 </br>
                 <ul class="form pi_ratepay_rate_form pi_ratepay_form">
                     {% if isset(pi_ratepay_rate_fon_check) %}
@@ -502,9 +509,6 @@
                         </p>
                     </div>
                 {% endif %}
-                <div>
-                    {{ translate({ ident: "PI_RATEPAY_POLICY" }) }}
-                </div>
                 </br>
                 <ul class="form pi_ratepay_rate0_form pi_ratepay_form">
                     {% if isset(pi_ratepay_rate0_fon_check) %}
@@ -611,11 +615,11 @@
         {% endif %}
         <script type="text/javascript">
             document.addEventListener('DOMContentLoaded', function(){
-                checkElvForm();
+                checkSepaForm();
             }, false);
         </script>
         <div class="payment-option">
-            <input id="payment_{{ sPaymentID }}" class="form-check-input" type="radio" onclick="piCalculator(); checkElvForm(); piCheckFingerprint();" name="paymentid" value="{{ sPaymentID }}" {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %} style="position:relative;">
+            <input id="payment_{{ sPaymentID }}" class="form-check-input" type="radio" onclick="checkSepaForm(); piCheckFingerprint();" name="paymentid" value="{{ sPaymentID }}" {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}checked{% endif %} style="position:relative;">
             <label for="payment_{{ sPaymentID }}">{{ paymentmethod.oxpayments__oxdesc.value }}</label>
             <div class="pi_ratepay_inner {% if oView.getCheckedPaymentId() == paymentmethod.oxpayments__oxid.value %}activePayment{% else %} d-none{% endif %}">
                 {% if pi_ratepay_elv_sandbox_notification == 1  %}
@@ -625,17 +629,7 @@
                         </p>
                     </div>
                 {% endif %}
-                <div>
-                    {{ translate({ ident: "PI_RATEPAY_POLICY" }) }}
-                </div>
                 <br/>
-                <div>
-                    <table>
-                        <tr>
-                            <td colspan="2">{{ translate({ ident: "PI_RATEPAY_VIEW_RATEPAY_INFO" }) }}</td>
-                        </tr>
-                    </table>
-                </div>
                 <ul class="form pi_ratepay_elv_form pi_ratepay_form">
                     {% if isset(pi_ratepay_elv_fon_check) %}
                         <li>
@@ -682,8 +676,28 @@
                     </p>
                     <p>
                         <label class="">{{ translate({ ident: "PI_RATEPAY_ELV_VIEW_BANK_IBAN" }) }}</label>
-                        <input id="pi_ratepay_elv_bank_iban" name="pi_ratepay_elv_bank_iban" onchange="checkElvForm()" maxlength='50' size='37' type="text" value="{{ pi_ratepay_elv_bank_iban }}" class="form-control required" />
+                        <input id="pi_ratepay_elv_bank_iban" name="pi_ratepay_elv_bank_iban" onchange="checkSepaForm()" maxlength='50' size='37' type="text" value="{{ pi_ratepay_elv_bank_iban }}" class="form-control required" />
                     </p>
+                </div>
+
+                <div class="panel" id="{{ sPaymentID }}_sepa_policy_panel">
+                    <div class="panel-header" id="{{ sPaymentID }}_sepa_policy_panel_title">
+                        {{ translate({ ident: "PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_0" }) }}
+                        <span class="panel-icon">▼</span>
+                    </div>
+                    <div class="panel-body-wrapper">
+                        <div class="panel-body-content">
+                            <p class="panel-text">
+                                {{ translate({ ident: "PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_1" }) }}
+                            </p>
+                            <p class="panel-text">
+                                {{ translate({ ident: "PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_2" }) }}
+                            </p>
+                            <p class="panel-text">
+                                {{ translate({ ident: "PI_RATEPAY_ELV_VIEW_MAND_CRED_NOTIFICATION_3" }) }}
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="margin: 15px 0;">
@@ -695,10 +709,8 @@
                             <td>
                                 <div id="pi_ratepay_elv_sepa_agreement">
                                     <p>
-                                        <input type="checkbox" name="pi_ratepay_elv_sepa_agreement_check" id="pi_ratepay_elv_sepa_agreement_check" class="form-check-input" onchange="checkElvForm()" class="required" />
-                                        <span style="margin-left: 5px">{{ translate({ ident: "PI_RATEPAY_ELV_VIEW_PRIVACY_AGREEMENT_TEXT_1" }) }}</span>
+                                        {{ translate({ ident: "PI_RATEPAY_ELV_VIEW_PRIVACY_AGREEMENT_TEXT_1" }) }}
                                     </p>
-                                    <p>{{ translate({ ident: "PI_RATEPAY_ELV_VIEW_PRIVACY_AGREEMENT_TEXT_2" }) }}</p>
                                 </div>
                             </td>
                         </tr>
@@ -725,6 +737,7 @@
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 piTogglePolicy('{{ sPaymentID }}');
+                piToggleSepaPolicy('{{ sPaymentID }}');
             });
         </script>
     {% endif %}
